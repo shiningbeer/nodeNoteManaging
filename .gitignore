@@ -1,4 +1,4 @@
 /node_modules
 *.pyc
-/src/node/targets/
-/src/node/zr/
+/src/targets/
+/src/zr/
