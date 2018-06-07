@@ -26,7 +26,8 @@ task_inteval=3
 def zmapwork(printed):
 
     task = dbo.get_one_task_to_zmap()
-    r = u'目前无可执行任务。'
+    r = u'No Task Now!'
+
     # 如果无任务，打印信息，定时下一次执行
     if task == None:
         if printed != r:
@@ -41,10 +42,10 @@ def zmapwork(printed):
     nodeTaskId=task['nodeTaskId']
     plugin=task['plugin']
     port=plugin['port']
-    if os.path.exists('targets/'+nodeTaskId):
-        logging.info(u'执行zmap任务'+id)
+    if os.path.exists('targets/'+nodeTaskId+'.ip'):
+        logging.info(u'Implement Zmap Task:'+id)
         #调用zmap,扫描白名单为path，端口为port
-        os.system('zmap -p '+port+' -B 1M -w ./targets/'+nodeTaskId+' -q -o ./zr/'+id)
+        os.system('zmap -p '+port+' -B 1M -w ./targets/'+nodeTaskId+'.ip -q -o ./zr/'+id)
         #完成后修改zmap为1
         dbo.modi_zmap_by_id(id,1)
         #读出结果数量，存入总数
@@ -53,7 +54,7 @@ def zmapwork(printed):
             count=count+1
         dbo.modi_ipTotal_by_id(id,count)
     else:
-        logging.info(u'出错')
+        logging.info(u'Error, cant find ip file!')
         #修改Status为出错，errMsg为can't find target
     # 完成一个后，直接执行下一个
     timer = threading.Timer(0, zmapwork,('',))

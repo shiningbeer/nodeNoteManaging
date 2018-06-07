@@ -69,7 +69,7 @@ const task = {
     for (var ip of ipRange) {
       stringIp = stringIp + ip + '\n'
     }
-    fs.writeFileSync('./targets/' + nodeTaskId, stringIp)
+    fs.writeFileSync('./targets/' + nodeTaskId+'.ip', stringIp)
     delete newNodeTask.ipRange
     var task = {
       ...newNodeTask,
@@ -77,7 +77,6 @@ const task = {
       syncStatus: 0,
     }
     dbo.task.add(task, (err, rest) => {
-      console.log(rest)
       err ? res.sendStatus(500) : res.sendStatus(200)
     })
 

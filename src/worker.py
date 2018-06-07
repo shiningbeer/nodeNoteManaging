@@ -30,7 +30,7 @@ def recordResult(result,tableName):
         dbo.saveResult(tableName,result)
 def work(printed):
     task = dbo.get_one_task_to_execute()
-    r = u'目前无可执行任务。'
+    r = u'No Task Now!'
     # 如果无任务，打印信息，定时下一次执行
     if task == None:
         if printed != r:
@@ -45,7 +45,7 @@ def work(printed):
     plugin=task['plugin']['name']
     plugin = plugin[0:len(plugin) - 3]
     ipTotal=task['ipTotal']
-    r = u'任务'+id+u'未找到插件:'+plugin
+    r = u'Task:'+id+u'cant find plugin. :'+plugin
     try:
         exec("from plugins import " + plugin + " as scanning_plugin")
     # 如果未找到插件(执行exec出错)，则打印信息，定时下一次执行
@@ -59,7 +59,7 @@ def work(printed):
         return
 
     if os.path.exists('zr/'+id):
-        logging.info(u'执行任务'+id)
+        logging.info(u'Implement task:'+id)
         dp=multiThread(thread_count,scanning_plugin.scan,recordResult)
         index=0   
         stepCounter=0
@@ -109,7 +109,7 @@ def work(printed):
         timer = threading.Timer(0, work,('',))
         timer.start()
     else:
-        logging.info(u'出错')
+        logging.info(u'Error!')
         #修改Status为出错，errMsg为can't find zmap result  
         dbo.modi_implStatus_by_id(id,-1,'can\'t find zmap result!')
         timer = threading.Timer(task_inteval,work, (printed,))
