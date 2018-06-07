@@ -69,6 +69,7 @@ const task = {
     for (var ip of ipRange) {
       stringIp = stringIp + ip + '\n'
     }
+    fs.openSync('./targets/' + nodeTaskId+'.ip', 'w+')
     fs.writeFileSync('./targets/' + nodeTaskId+'.ip', stringIp)
     delete newNodeTask.ipRange
     var task = {
