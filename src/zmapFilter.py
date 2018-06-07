@@ -54,7 +54,11 @@ def zmapwork(printed):
             count=count+1
         dbo.modi_ipTotal_by_id(id,count)
     else:
-        logging.info(u'Error, cant find ip file!')
+        logging.info(u'Error, cant find ip file!:/targets/'+nodeTaskId)
+        timer = threading.Timer(
+            task_inteval,zmapwork, (printed,))
+        timer.start()
+        return
         #修改Status为出错，errMsg为can't find target
     # 完成一个后，直接执行下一个
     timer = threading.Timer(0, zmapwork,('',))
