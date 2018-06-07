@@ -45,7 +45,7 @@ def zmapwork(printed):
     if os.path.exists('targets/'+nodeTaskId):
         logging.info(u'Implement Zmap Task:'+id)
         #调用zmap,扫描白名单为path，端口为port
-        os.system('zmap -p '+port+' -B 1M -w ./targets/'+nodeTaskId+'.ip -q -o ./zr/'+id)
+        os.system('zmap -p '+port+' -B 1M -w ./targets/'+nodeTaskId+' -q -o ./zr/'+id)
         #完成后修改zmap为1
         dbo.modi_zmap_by_id(id,1)
         #读出结果数量，存入总数
