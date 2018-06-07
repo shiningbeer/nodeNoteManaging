@@ -42,7 +42,7 @@ def zmapwork(printed):
     nodeTaskId=task['nodeTaskId']
     plugin=task['plugin']
     port=plugin['port']
-    if os.path.exists('targets/'+nodeTaskId+'.ip'):
+    if os.path.exists('targets/'+nodeTaskId):
         logging.info(u'Implement Zmap Task:'+id)
         #调用zmap,扫描白名单为path，端口为port
         os.system('zmap -p '+port+' -B 1M -w ./targets/'+nodeTaskId+'.ip -q -o ./zr/'+id)
