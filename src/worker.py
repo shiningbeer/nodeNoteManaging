@@ -58,7 +58,7 @@ def work(printed):
         timer.start()
         return
 
-    if os.path.exists('zr/'+id):
+    if os.path.exists('./zr/'+id):
         logging.info(u'Implement task:'+id)
         dp=multiThread(thread_count,scanning_plugin.scan,recordResult)
         index=0   
