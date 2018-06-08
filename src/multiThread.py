@@ -97,7 +97,7 @@ class multiThread(object):
         def threadFunc(queueIndex, args_runFunc,args_lock,index):
             self.queue[queueIndex]['params'] = args_runFunc
             self.queue[queueIndex]['index'] = index
-            r = self.__runFunc(self.runFunc,args_runFunc,2)  # 执行函数
+            r = self.__runFunc(self.runFunc,args_runFunc,60)  # 执行函数
             # print str(args_runFunc) + '退出了'
             self.lock.acquire()
             self.thread_func_access_lock(r,*args_lock)
