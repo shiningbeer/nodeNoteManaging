@@ -235,7 +235,7 @@ class Modbus:
     
         
 #if __name__ == '__main__':
-def FuncOfGetInfo(ip):
+def scan(ip):
     
     to_return = {}
     port = 502
