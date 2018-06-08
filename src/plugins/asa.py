@@ -31,7 +31,7 @@ class ikev1(object):
         self._host =host
         self._port = host_port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.settimeout(1.0)
+        self._sock.settimeout(3.0)
         self._id = id
         self._mid = 1
 
@@ -111,7 +111,7 @@ class ikev2(object):
         self._host = host
         self._port = host_port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.settimeout(1.0)
+        self._sock.settimeout(3.0)
         self._id = id
         self._mid = 1
 
@@ -202,6 +202,7 @@ def scan(ip):
         strResult= response.read()
         GetInfo(strResult)
         if info['version'] != 'null':
+            info['ip']=ip
             ikev1(ip, 500)
             ikev2(ip, 500)
         return info
