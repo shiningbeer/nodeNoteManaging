@@ -1,0 +1,24 @@
+Exception in thread Thread-4796:
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/threading.py", line 801, in __bootstrap_inner
+    self.run()
+  File "/usr/lib/python2.7/threading.py", line 754, in run
+    self.__target(*self.__args, **self.__kwargs)
+  File "/root/boshu/nodeNoteManaging/src/multiThread.py", line 103, in threadFunc
+    self.thread_func_access_lock(r,*args_lock)
+  File "worker.py", line 30, in recordResult
+    dbo.saveResult(tableName,result)
+  File "/root/boshu/nodeNoteManaging/src/dao.py", line 75, in saveResult
+    coll.insert_one(document)
+  File "/usr/local/lib/python2.7/dist-packages/pymongo/collection.py", line 683, in insert_one
+    session=session),
+  File "/usr/local/lib/python2.7/dist-packages/pymongo/collection.py", line 599, in _insert
+    bypass_doc_val, session)
+  File "/usr/local/lib/python2.7/dist-packages/pymongo/collection.py", line 580, in _insert_one
+    _check_write_command_response(result)
+  File "/usr/local/lib/python2.7/dist-packages/pymongo/helpers.py", line 207, in _check_write_command_response
+    _raise_last_write_error(write_errors)
+  File "/usr/local/lib/python2.7/dist-packages/pymongo/helpers.py", line 188, in _raise_last_write_error
+    raise DuplicateKeyError(error.get("errmsg"), 11000, error)
+DuplicateKeyError: E11000 duplicate key error collection: nodeDB.5b18e4eda33ca2614a3e9e98 index: _id_ dup key: { : ObjectId('5b19e83865d44073c53777e2') }
+
