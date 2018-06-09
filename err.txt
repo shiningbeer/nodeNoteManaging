@@ -22,3 +22,16 @@ Traceback (most recent call last):
     raise DuplicateKeyError(error.get("errmsg"), 11000, error)
 DuplicateKeyError: E11000 duplicate key error collection: nodeDB.5b18e4eda33ca2614a3e9e98 index: _id_ dup key: { : ObjectId('5b19e83865d44073c53777e2') }
 
+
+
+Exception in thread Thread-2802:
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/threading.py", line 801, in __bootstrap_inner
+    self.run()
+  File "/usr/lib/python2.7/threading.py", line 754, in run
+    self.__target(*self.__args, **self.__kwargs)
+  File "/root/boshu/nodeNoteManaging/src/multiThread.py", line 100, in threadFunc
+    r = self.__runFunc(self.runFunc,args_runFunc,60)  # 执行函数
+  File "/root/boshu/nodeNoteManaging/src/multiThread.py", line 71, in __runFunc
+    return t.result
+AttributeError: 'TimeLimited' object has no attribute 'result'
