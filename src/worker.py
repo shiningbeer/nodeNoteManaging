@@ -64,8 +64,10 @@ dbo=dbo()
 task_inteval=3
 thread_count=100
 record_step=2*thread_count
-def recordResult(result,tableName):
+def recordResult(result,tableName,ip):
     if result!=None and result!={}:
+        result['ip']=ip
+        result['scanTime']=int(time.time())
         try:
             dbo.saveResult(tableName,result)
         except:
@@ -118,7 +120,7 @@ def work(printed):
             if index<=resumeIndex:
                 continue
             #分派任务给线程        
-            dp.dispatch((line,),(nodetaskid,),index)
+            dp.dispatch((line,),(nodetaskid,line),index)
             stepCounter=stepCounter+1
             #每扫描record_step个记录一次进度
             if stepCounter==record_step:

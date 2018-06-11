@@ -330,7 +330,6 @@ def scan(ip):
                 output.clear()
             #to_return['UnitID_' + str(uid)] = copy.deepcopy(output)
             #output.clear()
-        to_return['ip']=ip
         sock.close()
     except Exception,e:
         print 'modbus get error', str(e)
