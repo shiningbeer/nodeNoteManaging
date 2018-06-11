@@ -48,6 +48,7 @@ class multiThread(object):
             def __init__(self,_error= None,):
                 Thread.__init__(self)
                 self._error = _error
+                self.result=None
             def run(self):
                 try:
                     self.result = func(*arg)
