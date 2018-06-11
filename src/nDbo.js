@@ -59,7 +59,7 @@ var result = {
     },
     getCount:(tName,callback)=>{
         dbo.collection(tName).stats((err,result)=>{
-            callback(err,result.count)
+            callback(err,result.count?result.count:0)
         });
     }
 }
