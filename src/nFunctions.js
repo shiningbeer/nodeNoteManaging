@@ -110,6 +110,7 @@ const task = {
       dbo.result.getCount(nodeTaskId,(err, result2) => {
         let result={count:result2,samples:result1}
         err ? res.sendStatus(500) : res.json(result)
+      })
     })
   },
   syncStatus: (req, res) => {
