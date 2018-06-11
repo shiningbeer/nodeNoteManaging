@@ -106,7 +106,8 @@ const task = {
     } = req.body
     if (nodeTaskId == null || skip == null || limit == null)
       return res.sendStatus(415)
-    dbo.result.getLimit(nodeTaskId, skip, limit, (err, result) => {
+//    dbo.result.getLimit(nodeTaskId, skip, limit, (err, result) => {
+    dbo.result.getCount(nodeTaskId,(err, result) => {
       err ? res.sendStatus(500) : res.json(result)
     })
   },

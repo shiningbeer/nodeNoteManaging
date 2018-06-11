@@ -56,6 +56,11 @@ var result = {
         dbo.collection(tName).find().skip(skip).limit(limit).toArray((err, result) => {
             callback(err, result)
         });
+    },
+    getCount:(tName,callback)=>{
+        dbo.collection(tName).stats((err,result)=>{
+            callback(err,result)
+        });
     }
 }
 
