@@ -62,7 +62,7 @@ def getId():
     return mId[::-1] 
 dbo=dbo()
 task_inteval=3
-thread_count=20
+thread_count=100
 record_step=2*thread_count
 def recordResult(result,tableName):
     if result!=None and result!={}:
