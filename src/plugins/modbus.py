@@ -235,7 +235,7 @@ class Modbus:
     
         
 #if __name__ == '__main__':
-def FuncOfGetInfo(ip):
+def scan(ip):
     
     to_return = {}
     port = 502
@@ -330,7 +330,7 @@ def FuncOfGetInfo(ip):
                 output.clear()
             #to_return['UnitID_' + str(uid)] = copy.deepcopy(output)
             #output.clear()
-        print 'to_return', to_return
+        to_return['ip']=ip
         sock.close()
     except Exception,e:
         print 'modbus get error', str(e)
