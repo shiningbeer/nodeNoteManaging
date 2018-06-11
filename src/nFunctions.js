@@ -106,9 +106,10 @@ const task = {
     } = req.body
     if (nodeTaskId == null || skip == null || limit == null)
       return res.sendStatus(415)
-//    dbo.result.getLimit(nodeTaskId, skip, limit, (err, result) => {
-    dbo.result.getCount(nodeTaskId,(err, result) => {
-      err ? res.sendStatus(500) : res.json(result)
+    dbo.result.getLimit(nodeTaskId, skip, limit, (err, result1) => {
+      dbo.result.getCount(nodeTaskId,(err, result2) => {
+        let result={count:result2,samples:result1}
+        err ? res.sendStatus(500) : res.json(result)
     })
   },
   syncStatus: (req, res) => {
