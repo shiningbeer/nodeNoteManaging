@@ -112,7 +112,7 @@ def funct_lookup(str_id):
    result = "%s (%d)" %(funct_id, num)
    return result
 #if __name__ == '__main__':
-def FuncOfGetInfo(ip):
+def scan(ip):
    to_return={}
    
    port = 20000
