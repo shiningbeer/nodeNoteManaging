@@ -54,13 +54,13 @@ var find = (col, wherestr = {}, callback) => {
 var result = {
     getLimit: (tName, skip, limit, callback) => {
         dbo.collection(tName).find().skip(skip).limit(limit).toArray((err, result) => {
-            callback(err, err?result:[])
+            callback(err, err?[]:result)
         });
     },
     getCount:(tName,callback)=>{
         dbo.collection(tName).stats((err,result)=>{
 
-            callback(err,err?result.count:0)
+            callback(err,err?0:result.count)
         });
     }
 }
