@@ -76,6 +76,10 @@ const task = {
       zmap: 0,
       syncStatus: 0,
     }
+    dbo.task.createCol(nodeTaskId,(err,rest)=>{
+      if (err)
+        res.sendStatus(500)
+    })
     dbo.task.add(task, (err, rest) => {
       err ? res.sendStatus(500) : res.sendStatus(200)
     })
@@ -109,6 +113,7 @@ const task = {
     dbo.result.getLimit(nodeTaskId, skip, limit, (err, result1) => {
       dbo.result.getCount(nodeTaskId,(err, result2) => {
         let result={count:result2,samples:result1}
+        console.log(err)
         err ? res.sendStatus(500) : res.json(result)
       })
     })

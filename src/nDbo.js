@@ -71,6 +71,9 @@ var task = {
     add: (newNodeTask, callback) => {
         insert(TABLES.task, newNodeTask, callback)
     },
+    createCol:(name,callback)=>{
+        dbo.createCollection(name,(err,result)=>{callback(err,result)})
+    },
     del: (taskId, callback) => {
         var wherestr = {
             nodeTaskId: taskId
