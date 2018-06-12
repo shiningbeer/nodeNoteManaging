@@ -66,8 +66,7 @@ thread_count=100
 record_step=2*thread_count
 def recordResult(result,tableName,ip):
     if result!=None and result!={}:
-        result['ip']=ip
-        result['scanTime']=int(time.time())
+        rest={'ip':ip,'scanTime':int(time.time()),'data':result}
         try:
             dbo.saveResult(tableName,result)
         except:
