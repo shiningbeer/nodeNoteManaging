@@ -76,7 +76,7 @@ thread_count=100
 record_step=2*thread_count
 def recordResult(result,tableName,ip):
     if result!=None and result!={}:
-	convert2unicode(result)
+        convert2unicode(result)
         rest={'ip':ip,'scanTime':int(time.time()),'data':result}
         try:
             dbo.saveResult(tableName,result)
