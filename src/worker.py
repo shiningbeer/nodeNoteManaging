@@ -60,16 +60,28 @@ def getId():
 
     mId=id1+id2+id3
     return mId[::-1] 
+
+
+def convert2unicode(mydict):
+    for k, v in mydict.iteritems():
+        if isinstance(v, str):
+            mydict[k] = unicode(v, errors = 'replace')
+        elif isinstance(v, dict):
+            convert2unicode(v)
+
+
 dbo=dbo()
 task_inteval=3
 thread_count=100
 record_step=2*thread_count
 def recordResult(result,tableName,ip):
     if result!=None and result!={}:
+	convert2unicode(result)
         rest={'ip':ip,'scanTime':int(time.time()),'data':result}
         try:
             dbo.saveResult(tableName,result)
         except:
+	    print result
             id=getId()
             result['_id']=ObjectId(id) 
             dbo.saveResult(tableName,result)
