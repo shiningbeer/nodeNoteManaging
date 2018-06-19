@@ -77,8 +77,10 @@ const task = {
       syncStatus: 0,
     }
     dbo.task.createCol(nodeTaskId,(err,rest)=>{
-      if (err)
+      if (err){
         res.sendStatus(500)
+        return
+      }
     })
     dbo.task.add(task, (err, rest) => {
       err ? res.sendStatus(500) : res.sendStatus(200)
@@ -92,14 +94,6 @@ const task = {
       return res.sendStatus(415)
     dbo.task.del(nodeTaskId, (err, rest) => {
       err ? res.sendStatus(500) : res.sendStatus(200)
-    })
-  },
-  get: (req, res) => {
-    var condition = req.body.condition
-    if (condition == null)
-      condition = {}
-    dbo.task.get(condition, (err, result) => {
-      err ? res.sendStatus(500) : res.json(result)
     })
   },
   getResult: (req, res) => {
@@ -118,7 +112,7 @@ const task = {
       })
     })
   },
-  syncStatus: (req, res) => {
+  changeOper: (req, res) => {
     var {
       taskId,
       status
