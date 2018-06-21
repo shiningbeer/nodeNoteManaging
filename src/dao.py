@@ -5,22 +5,38 @@ from bson import ObjectId
 import pymongo
 import datetime
 import sys
+from const import *
 
 default_encoding = 'utf-8'
 if sys.getdefaultencoding() != default_encoding:
     reload(sys)
     sys.setdefaultencoding(default_encoding)
 
-# operStatus = {"删除": -1, "执行": 1, "暂停": 2, "完成": 3}
-# implStatus={"出错": -1, "正常":0,"完成":1}
-# zmap={"未完成":0,"完成":1}
-
+TASK='task'
 class daoNodeManager(object):
     # 构造时连接数据库
     def __init__(self):
         self.client = mc()
         self.db = self.client.nodeDB
+        
 
+    def update_task(self,find_dict,update_dict):
+        coll=self.db[TASK]
+        return coll.update_many(find_dict, {"$set":update_dict })
+    
+    def getOne_task(self,find_dict):
+        coll=self.db[TASK]
+        cur = coll.find(find_dict)
+        tks = []
+        for d in cur:
+            d['id'] = d['_id'].__str__()
+            d.pop('_id')
+            tks.append(d)
+        if len(tks)==0:
+            return None
+        return tks[0]
+
+        
     def get_one_task_to_zmap(self):
         coll = self.db.task
         cur = coll.find({'operStatus':1,'zmap':0,'implStatus':0})

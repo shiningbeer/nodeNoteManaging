@@ -4,6 +4,7 @@ import json
 import sys
 import threading
 from dao import daoNodeManager as dbo
+from const import *
 import logging
 from time import sleep
 from bson import ObjectId
@@ -17,7 +18,9 @@ if sys.getdefaultencoding() != default_encoding:
 # set the format of logging and set the default logging level as info
 logging.basicConfig(
     level=logging.INFO,
-    format="[%(asctime)s] %(message)s"
+    format="[%(asctime)s] %(message)s",
+    filename='./worklog.log',
+    filemode='a'
 )
 
 
@@ -55,12 +58,15 @@ def convert2unicode(mydict):
         elif isinstance(v, dict):
             convert2unicode(v)
 
-
+# initialize the database operator
 dbo=dbo()
-# the following value should be taken from database
-task_inteval=3
-thread_count=100
-record_step=2*thread_count
+
+# global variable
+get_task_inteval=3
+available_thread_count=100
+record_step=200
+last_log=''
+
 def recordResult(result,tableName,ip):
     '''
     record the result into database.
@@ -78,7 +84,36 @@ def recordResult(result,tableName,ip):
             dbo.saveResult(tableName,result)
 
 
+def getTask():
+    '''
+    get suitable tasks to run
+    this should be run as timer function with inteval between each running
+    '''
+    if available_thread_count<=0:
+        # wait for a moment to run again
+        timer = threading.Timer(get_task_inteval, getTask)
+        timer.start()
+    else:
+        # get a task to run
+        task=dbo.getOne_task({fOPERSTATUS:sRUN,fIMPLSTATUS:sNORMAL,fISRUNNINGWORKER:False,fZMAPSTATUS:sCOMPLETE})
+        msg = 'No Task Now!'
+        # if no task, wait and run again
+        if task == None:
+            if last_log!=msg:
+                logging.info(msg)
+                last_log = msg
+                print msg
+            timer = threading.Timer(get_task_inteval,getTask)
+            timer.start()
+            return
+        else:
+
+    
 def work(printed):
+    '''
+    this is the thread working function
+    
+    '''
     task = dbo.get_one_task_to_execute()
     r = u'No Task Now!'
     # 如果无任务，打印信息，定时下一次执行
@@ -172,4 +207,13 @@ def doWork():
 
 
 if __name__ == '__main__':
-    doWork()
+    # when startup, all the tasks should not be running
+    dbo.update_task({fIMPLSTATUS:{'$ne':sCOMPLETE}},{fISRUNNINGWORKER:False})
+    # set the global variables from the db
+    get_task_inteval=3
+    available_thread_count=100
+    record_step=200
+    last_log=''
+    # start the getTask timer
+    timer = threading.Timer(0, getTask)
+    timer.start()
