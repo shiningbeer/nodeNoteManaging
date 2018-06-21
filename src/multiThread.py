@@ -16,7 +16,7 @@ if sys.getdefaultencoding() != default_encoding:
     sys.setdefaultencoding(default_encoding)
 
 
-def working_with_timeout(self,func,arg,timeout):
+def working_with_timeout(func,arg,timeout):
     ''' Putting func with time limitation.
 
     Args:
@@ -59,75 +59,81 @@ def working_with_timeout(self,func,arg,timeout):
 class multiThread(object):
 
     def __init__(self, max_thread_count, work_func, lock_func):
-    '''
-    Args:
-    	-max_thread_count: the max thread count allowed
-    	-work_func: the thread function without involving shared resources
-        -lock_func: shared resources involoved part of function codes
-    
-    '''
-    	self.max_thread_count = max_thread_count
-    	self.present_thread_count = 0
-    	self.work_func= work_func
-    	self.lock_func = lock_func
-    	self.lock = threading.Lock()
+        '''
+        Args:
+            -max_thread_count: the max thread count allowed
+            -work_func: the thread function without involving shared resources
+            -lock_func: shared resources involoved part of function codes, the first param of the func must be the result of work_func
+        
+        '''
+    	self.__max_thread_count = max_thread_count
+    	self.__present_thread_count = 0
+    	self.__work_func= work_func
+    	self.__lock_func = lock_func
+    	self.__lock = threading.Lock()
     	self.__payloadList = []
     	self.__paramsList = []
-    def dispatch(self, args_work,args_lock,payload):
+    def dispatch(self, args_work,args_lock,payload,timeout):
     	''' use this function to create a thread with the params needed to pass to the thread functions
         Args:
              -args_work: args for the work_func
              -args_lock: args for the lock_func
              -payload: other params need to be processed by thread
+             -timeout:the max time for running work_func
     	'''
+    	def threadFunc(args_work,args_lock,payload):
+            self.__payloadList.append(payload)#record the payload
+            self.__paramsList.append(args_work)#record the args
+            r = working_with_timeout(self.__work_func,args_work,timeout)  #running the work_func with time limitation
+            self.__lock.acquire()
+            self.__lock_func(r,*args_lock)# running lock_func, the first param must be the result of work_func
+            self.__present_thread_count=self.__present_thread_count- 1  # minus 1 for the thread count when this thread is over
+            self.__payloadList.remove(payload)#remove the payload
+            self.__paramsList.remove(args_work)#remove the args
+            self.__lock.release()
 
-        
-    	def threadFunc(queueIndex, args_runFunc,args_lock,index):
-    		self.queue[queueIndex]['params'] = args_runFunc
-    		self.queue[queueIndex]['index'] = index
-    		r = self.__runFunc(self.runFunc,args_runFunc,60)  # 执行函数
-    		# print str(args_runFunc) + '退出了'
-    		self.lock.acquire()
-    		self.lock_func(r,*args_lock)
-    		self.threadCount = self.threadCount - 1  # 退出时，线程数量-1
-    		self.threadFull = False  # 退出了一个，线程肯定不满了
-    		# 退出时设置队列可用，执行进度记录一下
-    		self.queue[queueIndex]['available'] = True
+    	# waiting until the threads pool is not full
+        while True:
+            if self.__present_thread_count>=self.__max_thread_count:
+                sleep (1)
+            else:
+                break
+        # add 1 to thread count
+        self.__present_thread_count=self.__present_thread_count+1
 
-    		self.lock.release()
-
-    	# 线程个数+1,如果个数与最大个数相等，说明满了。
-    	self.threadCount = self.threadCount + 1
-    	if self.threadCount == self.maxThread:
-    		self.threadFull = True
-    	while self.threadFull:
-    		sleep(0.5)
-    	# 取得空队列
-    	queueIndex = None
-    	while queueIndex == None:
-    		for i in range(0, self.maxThread):
-    			if self.queue[i]['available']:
-    				queueIndex = i
-    				break
-    	# 新建一个线程加入队列,由于队列并不需要了解哪个线程加入队列，只要将队列设置成false表示当前队列不可用即可。
-    	self.queue[queueIndex]['available'] = False
-    	# 将队列index传给线程，使得它可以在线程退出时设置当前队列执行到哪里
     	t = threading.Thread(
-    		target=threadFunc, args=(queueIndex, args_runFunc,args_lock,index))
+    		target=threadFunc, args=(args_work,args_lock,payload))
     	t.start()
 
-    def getAllPayload(self):
-    	return self.__payloadList
-    def getAllParams(self):
-    	return self.__paramsList
-
+    def snap_thread_payloads(self):
+        '''
+        get the snap of payloads taken by the threads
+        '''
+        self.__lock.acquire()
+        present_payload=[]
+        for item in self.__payloadList:
+            present_payload.append(item)
+        self.__lock.release()
+        return present_payload
+    
+    def snap_thread_params(self):
+        '''
+        get the snap of params given to the threads
+        '''
+        self.__lock.acquire()
+        present_params=[]
+        for item in self.__paramsList:
+            present_params.append(item)
+        self.__lock.release()
+        return present_params
 if __name__ == '__main__':
-    #例子
+    #example
     def scan(x, y):
-    	# print '我是' + str(x) + ',' + str(y)
-    	# pass
-    	if x>5:
-    		sleep(3)
+    	#print 'I\'m ' + str(x) + ',' + str(y)
+        if y==3:
+            sleep(70)
+        else:
+            sleep(3)
     	return x + y
 
     def record(r,f,i,y):
@@ -135,14 +141,15 @@ if __name__ == '__main__':
     	f.writelines(line)
     	f.flush()
 
-    dp = multiThread(5, scan, record)
+    dp = multiThread(25, scan, record)
     f = open('aaaa.txt', 'a')
+    index=0
     for i in range(0, 10):		
     	for y in range(0, 10):
-    		while dp.threadFull:
-    			sleep(0.1)
-    		dp.dispatch((i, y),(f,i,y),(i,y))
-    	print dp.getAllThreadIndex()
-    sleep(3)
+            index=index+1
+            dp.dispatch((i, y),(f,i,y),index,60)
+            print dp.snap_thread_payloads()
+            print dp.snap_thread_params()
+    sleep(13)
     f.close()
     print "ok"

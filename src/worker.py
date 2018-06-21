@@ -7,24 +7,24 @@ from dao import daoNodeManager as dbo
 import logging
 from time import sleep
 from bson import ObjectId
+import datetime,time,random
 from multiThread import multiThread
-# 设置默认的level为DEBUG
-# 设置log的格式
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(asctime)s] %(message)s"
-)
-
 default_encoding = 'utf-8'
 if sys.getdefaultencoding() != default_encoding:
     reload(sys)
     sys.setdefaultencoding(default_encoding)
 
-import datetime,time,random
+# set the format of logging and set the default logging level as info
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(message)s"
+)
 
-#10进制转换36进制
+
+
+# function copyed from internet. hexadecimal from 10 to 36
 def hex36(num):
-    # 正常36进制字符应为'0123456789abcdefghijklmnopqrstuvwxyz'，这里我打乱了顺序
+    # normal 36 hexadecimal36 should be '0123456789abcdefghijklmnopqrstuvwxyz'，the key here has been disordered
     key='t5hrwop6ksq9mvf8xg3c4dzu01n72yeabijl'
     a = []
     while num != 0:
@@ -34,34 +34,20 @@ def hex36(num):
     out = ''.join(a)
     return out
 
-#获取唯一标识
+# function copyed from internet. get the unique id
 def getId():
-    #36进制位数对应10进制数范围参考：
-    #1位：0-35
-    #2位：36-1295
-    #3位：1296-46655
-    #4位：46656-1679615
-    #5位：1679616-60466175
-    #6位：60466176-2176782335
-
-    # 只要秒数大于60466175，就可以转换出6位的36进制数，这里从2015年1月1日开始计算，约70年后会变成7位
     d1=datetime.datetime(2015,1,1)
     d2=datetime.datetime.now()
-    #获取秒数
     s=(d2-d1).days*24*60*60
-    #获取微秒数
     ms=d2.microsecond
-    #随机两位字符串
     id1=hex36(random.randint(36, 1295))
-    #转换秒数
     id2=hex36(s)
-    #转换微秒数，加46656是为了保证达到4位36进制数
     id3=hex36(ms+46656)
 
     mId=id1+id2+id3
     return mId[::-1] 
 
-
+# function copyed from internet. convert all strings in a dict to unicode
 def convert2unicode(mydict):
     for k, v in mydict.iteritems():
         if isinstance(v, str):
@@ -71,10 +57,15 @@ def convert2unicode(mydict):
 
 
 dbo=dbo()
+# the following value should be taken from database
 task_inteval=3
 thread_count=100
 record_step=2*thread_count
 def recordResult(result,tableName,ip):
+    '''
+    record the result into database.
+    this is the lock_func of multiThread class
+    '''
     if result!=None and result!={}:
         convert2unicode(result)
         rest={'ip':ip,'scanTime':int(time.time()),'data':result}
