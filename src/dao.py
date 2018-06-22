@@ -24,13 +24,16 @@ class daoNodeManager(object):
         coll=self.db[TASK]
         return coll.update_many(find_dict, {"$set":update_dict })
     
+    def pushArray_task(self,find_dict,push_dict):
+        coll=self.db[TASK]
+        return coll.update_many(find_dict, {"$push":push_dict })
+
+
     def getOne_task(self,find_dict):
         coll=self.db[TASK]
         cur = coll.find(find_dict)
         tks = []
         for d in cur:
-            d['id'] = d['_id'].__str__()
-            d.pop('_id')
             tks.append(d)
         if len(tks)==0:
             return None

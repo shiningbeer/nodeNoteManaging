@@ -15,6 +15,12 @@ if sys.getdefaultencoding() != default_encoding:
     reload(sys)
     sys.setdefaultencoding(default_encoding)
 
+'''
+ CODE CONVENTION
+ variable naming: with '_' between words, such as 'last_log'
+ function naming: the start letter of each words should be captialized
+
+'''
 # set the format of logging and set the default logging level as info
 logging.basicConfig(
     level=logging.INFO,
@@ -22,7 +28,6 @@ logging.basicConfig(
     filename='./worklog.log',
     filemode='a'
 )
-
 
 
 # function copyed from internet. hexadecimal from 10 to 36
@@ -62,11 +67,19 @@ def convert2unicode(mydict):
 dbo=dbo()
 
 # global variable
-get_task_inteval=3
+load_task_inteval=3
 available_thread_count=100
-record_step=200
 last_log=''
 
+def logMsg(msg):
+    '''
+    log the msg not repeatedly
+    '''
+    if last_log!=msg:
+        logging.info(msg)
+        last_log = msg
+        print msg
+    
 def recordResult(result,tableName,ip):
     '''
     record the result into database.
@@ -83,137 +96,135 @@ def recordResult(result,tableName,ip):
             result['_id']=ObjectId(id) 
             dbo.saveResult(tableName,result)
 
-
-def getTask():
+def doTask():
     '''
     get suitable tasks to run
-    this should be run as timer function with inteval between each running
     '''
-    if available_thread_count<=0:
-        # wait for a moment to run again
-        timer = threading.Timer(get_task_inteval, getTask)
-        timer.start()
-    else:
-        # get a task to run
-        task=dbo.getOne_task({fOPERSTATUS:sRUN,fIMPLSTATUS:sNORMAL,fISRUNNINGWORKER:False,fZMAPSTATUS:sCOMPLETE})
-        msg = 'No Task Now!'
-        # if no task, wait and run again
-        if task == None:
-            if last_log!=msg:
-                logging.info(msg)
-                last_log = msg
-                print msg
-            timer = threading.Timer(get_task_inteval,getTask)
-            timer.start()
-            return
-        else:
+    def errDealing(id,screen_msg,db_msg):
+        ''' mark the task as err and record the err msg
+        args:
+            id: task id
+            screen_msg: the msg logging to screen and file
+            db_msg: the msg push to keyLog of the task db
+        '''
+        logMsg(screen_msg)
+        # mark the task as wrong
+        dbo.update_task({f_ID:id},{fIMPLSTATUS:sWRONG,fNEEDTOSYNC:True})
+        # add to the task log
+        dbo.pushArray_task({f_ID:id},{fKEYLOG:db_msg})
 
-    
-def work(printed):
-    '''
-    this is the thread working function
-    
-    '''
-    task = dbo.get_one_task_to_execute()
-    r = u'No Task Now!'
-    # 如果无任务，打印信息，定时下一次执行
-    if task == None:
-        if printed != r:
-            logging.info(r)
-            printed = r
-        timer = threading.Timer(task_inteval,work, (printed,))
-        timer.start()
+    ##### timer end case 1: threads are full
+    if available_thread_count<=0:
+        logMsg('Threads Full! Can Not Load Any More Task!')
+        # end of the func thus the timer
         return
-    # 如果有任务
-    id=task['id']
-    nodetaskid=task['nodeTaskId']
-    plugin=task['plugin']['name']
+    # get a task to run
+    task=dbo.getOne_task({fOPERSTATUS:sRUN,fIMPLSTATUS:sNORMAL,fISRUNNINGWORKER:False,fZMAPSTATUS:sCOMPLETE})
+
+    ##### timer end case 2: no task to run
+    if task == None:
+        logMsg('No Task Now!')
+        # end of the func thus the timer
+        return
+    # compute the thread count
+    id=task[f_ID]
+    thread_demand=task[fTHREADDEMAND]
+    thread_allot=0
+    if thread_demand>=available_thread_count:
+        # allot all the available to this task
+        thread_allot=available_thread_count
+        available_thread_count=0
+    else:
+        # allot its demand count
+        thread_allot=thread_demand
+        available_thread_count=available_thread_count-thread_demand
+    
+    # see if there are problems with plugin and zmap result.
+    strid=task[f_ID].__str__()
+    node_task_id=task[fNODETASKID]
+    plugin=task[fPLUGIN][fNAME]
     plugin = plugin[0:len(plugin) - 3]
-    ipTotal=task['ipTotal']
-    r = u'Task:'+id+u'cant find plugin. :'+plugin
+    iptotal=task[fIPTOTAL]
+    progress=task[fPROGRESS]
     try:
         exec("from plugins import " + plugin + " as scanning_plugin")
-    # 如果未找到插件(执行exec出错)，则打印信息，定时下一次执行
+    ##### timer end case 3 : can't find plugin
     except:
-        if printed != r:
-            logging.info(r)
-            printed = r
-        dbo.modi_implStatus_by_id(id,-1,'can\'t find plugin')
-        timer = threading.Timer(task_inteval,work, (printed,))
-        timer.start()
+        errDealing(id,'Task:'+strid+'----cant find plugin:'+plugin,'cant find plugin:'+plugin)
+        # end of this fucntion and thus the timer
+        return
+    ##### timer end case 4 plugin does not has the scan function
+    if scanning_plugin.scan:
+        screen_msg='Task:'+strid+'----plugin:'+plugin+' does not have the function scan!'
+        db_msg='plugin'+plugin+' have no scan function!'
+        errDealing(id,screen_msg,db_msg)
+        # end of this fucntion and thus the timer
+        return
+    ##### timer end case 5 can't find zmap result file
+    if os.path.exists('./zr/'+strid):
+        errDealing(id,'Task:'+strid+'----cant find zmap result file!','cant find zmap result file!')
+        # end of this fucntion and thus the timer
         return
 
-    if os.path.exists('./zr/'+id):
-        logging.info(u'Implement task:'+id)
-        dp=multiThread(thread_count,scanning_plugin.scan,recordResult)
-        index=0   
-        stepCounter=0
-        resumeIndex=dbo.get_progress(id)        
-        for line in  open('zr/'+id, 'r'):       
-            line=line.strip()
-            logging.info
-            #寻找到上次的进度        
-            index=index+1
-            if index<=resumeIndex:
-                continue
-            #分派任务给线程        
-            dp.dispatch((line,),(nodetaskid,line),index)
-            stepCounter=stepCounter+1
-            #每扫描record_step个记录一次进度
-            if stepCounter==record_step:
-                r=dp.getAllThreadIndex()#获取每个线程执行到哪
-                #取得最小
+    # it is comfired the task can be run, so adjust thread count, set the task is running
+    dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fISRUNNINGWORKER:True,fNEEDTOSYNC:True})
+
+    # do the job                
+    logMsg('Run Task:'+strid)
+    # use mutiple threads to run the plugin's scan to do this job
+    dp=multiThread(thread_allot,scanning_plugin.scan,recordResult)
+    index=0   
+    stepCounter=0
+    for line in  open('zr/'+strid, 'r'):       
+        line=line.strip()
+        logging.info
+        # start from progress        
+        index=index+1
+        if index<=progress:
+            continue
+        # one thread is dispatched to one line of ip, the params here are passed to thread functions
+        dp.dispatch((line,),(node_task_id,line),index)
+        stepCounter=stepCounter+1
+        # record the progress
+        if stepCounter==record_step:
+            r=dp.snap_thread_payloads # take the payloads all the thread is taking presently
+            # find the least
+            least=r[0]
+            for item in r:                    
+                if item<least:
+                    least=item
+            dbo.update_task({f_ID:id},{fPROGRESS:least,fNEEDTOSYNC:True})
+            print least
+            stepCounter=0
+        # look for any modification of the task instruction or params
+        task_modi=dbo.getOne_task({f_ID:id})
+
+        ##### timer end case 6 : task paused by new instruction
+        if task_modi[fOPERSTATUS]!=sRUN:
+            # record progress
+            r=dp.snap_thread_payloads()
+            if r!=None:
                 least=r[0]
                 for item in r:                    
                     if item<least:
                         least=item
-                dbo.record_progress(id,least)
-                print least
-                stepCounter=0
-            #查看任务指令是否变化
-            newImpl=dbo.get_new_operStatus(id)
-            if newImpl!=1:
-                #记录执行进度
-                r=dp.getAllThreadIndex()
-                if r!=None:
-                    least=r[0]
-                    for item in r:                    
-                        if item<least:
-                            least=item
-                    dbo.record_progress(id,least)
-                #定时下次执行
-                timer = threading.Timer(task_inteval, work,('',))
-                timer.start()
-                #退出本次执行
-                return
+                dbo.update_task({f_ID:id},{fPROGRESS:least,fNEEDTOSYNC:True})
+            return
 
-         #修改状态为完成
-        dbo.modi_implStatus_by_id(id,1,'')
-        dbo.record_progress(id,ipTotal)
-        # 完成一个后，直接执行下一个
-        timer = threading.Timer(0, work,('',))
-        timer.start()
-    else:
-        logging.info(u'Error!')
-        #修改Status为出错，errMsg为can't find zmap result  
-        dbo.modi_implStatus_by_id(id,-1,'can\'t find zmap result!')
-        timer = threading.Timer(task_inteval,work, (printed,))
-        timer.start()
-    
-
-def doWork():
-    timer = threading.Timer(0, work,('',))
-    timer.start()
+    # task complete! change the status
+    dbo.update_task({f_ID:id},{fIMPLSTATUS:sCOMPLETE,fOPERSTATUS:sCOMPLETE,fNEEDTOSYNC:True,fPROGRESS:iptotal})
+    ##### timer end case 7: task completed!!
 
 
 if __name__ == '__main__':
     # when startup, all the tasks should not be running
-    dbo.update_task({fIMPLSTATUS:{'$ne':sCOMPLETE}},{fISRUNNINGWORKER:False})
+    dbo.update_task({fIMPLSTATUS:{'$ne':sCOMPLETE}},{fISRUNNINGWORKER:False,fTHREADREAL:0})
     # set the global variables from the db
-    get_task_inteval=3
+    load_task_inteval=3
     available_thread_count=100
-    record_step=200
     last_log=''
-    # start the getTask timer
-    timer = threading.Timer(0, getTask)
-    timer.start()
+    # every inteval,start a timer to find a task to run
+    while True:
+        timer = threading.Timer(0,doTask)
+        timer.start()
+        sleep(load_task_inteval)
