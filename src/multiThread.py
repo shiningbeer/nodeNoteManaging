@@ -16,7 +16,7 @@ if sys.getdefaultencoding() != default_encoding:
     sys.setdefaultencoding(default_encoding)
 
 
-def working_with_timeout(func,arg,timeout):
+def runFuncWithTimeLimit(func,arg,timeout):
     ''' Putting func with time limitation.
 
     Args:
@@ -84,7 +84,7 @@ class multiThread(object):
     	def threadFunc(args_work,args_lock,payload):
             self.__payloadList.append(payload)#record the payload
             self.__paramsList.append(args_work)#record the args
-            r = working_with_timeout(self.__work_func,args_work,timeout)  #running the work_func with time limitation
+            r = runFuncWithTimeLimit(self.__work_func,args_work,timeout)  #running the work_func with time limitation
             self.__lock.acquire()
             self.__lock_func(r,*args_lock)# running lock_func, the first param must be the result of work_func
             self.__present_thread_count=self.__present_thread_count- 1  # minus 1 for the thread count when this thread is over
@@ -105,7 +105,7 @@ class multiThread(object):
     		target=threadFunc, args=(args_work,args_lock,payload))
     	t.start()
 
-    def snap_thread_payloads(self):
+    def snapThreadPayloads(self):
         '''
         get the snap of payloads taken by the threads
         '''
@@ -116,7 +116,7 @@ class multiThread(object):
         self.__lock.release()
         return present_payload
     
-    def snap_thread_params(self):
+    def snapThreadParams(self):
         '''
         get the snap of params given to the threads
         '''
@@ -126,6 +126,9 @@ class multiThread(object):
             present_params.append(item)
         self.__lock.release()
         return present_params
+    def setMaxThreadCount(self,max_thread_count):
+        self.__max_thread_count=max_thread_count
+
 if __name__ == '__main__':
     #example
     def scan(x, y):
@@ -148,8 +151,8 @@ if __name__ == '__main__':
     	for y in range(0, 10):
             index=index+1
             dp.dispatch((i, y),(f,i,y),index,60)
-            print dp.snap_thread_payloads()
-            print dp.snap_thread_params()
+            print dp.snapThreadPayloads()
+            print dp.snapThreadParams()
     sleep(13)
     f.close()
     print "ok"
