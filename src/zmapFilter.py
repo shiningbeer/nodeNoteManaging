@@ -40,6 +40,7 @@ dbo=dbo()
 mylog=logMsg('')
 task_inteval=3
 run_zmap_count=1
+lock=threading.Lock()
 def zmapwork():
     def markTaskErr(id,err_msg):        
         ''' mark the task as err and record the err msg
@@ -53,10 +54,18 @@ def zmapwork():
         dbo.update_task({f_ID:id},{fZMAPSTATUS:sWRONG,fNEEDTOSYNC:True})
         # add to the task log
         dbo.pushArray_task({f_ID:id},{fKEYLOG:err_msg})
+    def decrementZmapLimit():
+        lock.acquire()
+        run_zmap_count=run_zmap_count-1
+        lock.release()
 
+    def incrementZmapLimit():
+        lock.acquire()
+        run_zmap_count=run_zmap_count+1
+        lock.release()
+    
     # zmap run limit
-    run_zmap_count=run_zmap_count-1
-    if run_zmap_count<0:
+    if run_zmap_count<=0:
         mylog.log('Waiting other task to be done')
         return
 
@@ -67,6 +76,7 @@ def zmapwork():
         mylog.log('No Task Now!')
         return
     # if there is a task 
+    decrementZmapLimit()
     id=task['id']
     nodeTaskId=task['nodeTaskId']
     plugin=task['plugin']
@@ -78,6 +88,7 @@ def zmapwork():
             os.system('zmap -p '+port+' -B 5M -w ./targets/'+nodeTaskId+' -o ./zr/'+id)
         except:
             mylog.log('can\'t run zmap, please ensure zmap is installed!')
+            incrementZmapLimit()
             return
         
         # compute the count of the result
@@ -86,13 +97,15 @@ def zmapwork():
             count=count+1
         # after work done, mark the task that zmap has finished, and store the count of result
         dbo.update_task({f_ID:id},{fZMAPSTATUS:sCOMPLETE,fIPTOTAL:count,fNEEDTOSYNC:True})
+        incrementZmapLimit()
     else:
         markTaskErr(id,'Error, cant find ip file!:/targets/'+nodeTaskId)
+        incrementZmapLimit()
 
 if __name__ == '__main__':
     # todo:only one sample of this programme should be run
     # at the start, set all task no running zmap
-    dbo.update_task({fZMAPSTATUS:{'$ne':sRUNNING}},{fZMAPSTATUS:sWAITING,fNEEDTOSYNC:True})
+    dbo.update_task({fZMAPSTATUS:sRUNNING},{fZMAPSTATUS:sWAITING,fNEEDTOSYNC:True})
     task_inteval=3
     run_zmap_count=1
     # every inteval,start a timer to find a task to run
