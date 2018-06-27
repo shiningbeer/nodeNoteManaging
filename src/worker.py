@@ -81,9 +81,7 @@ class logMsg(object):
 dbo=dbo()
 mylog=logMsg('')
 # global variables
-load_task_inteval=3
 available_thread_count=100
-lastdd_log=''
     
 def recordResult(result,tableName,ip):
     '''
@@ -112,8 +110,10 @@ def doTask():
             err_msg: the err msg need to logging
         '''
         mylog.log(err_msg)
+        
+        
         # mark the task as wrong
-        dbo.update_task({f_ID:id},{fIMPLSTATUS:sWRONG,fNEEDTOSYNC:True})
+        dbo.update_task({f_ID:id},{fIMPLSTATUS:sWRONG,fNEEDTOSYNC:True,fTHREADALLOT:0})
         # add to the task log
         dbo.pushArray_task({f_ID:id},{fKEYLOG:err_msg})
 
@@ -123,7 +123,7 @@ def doTask():
         # end of the func thus the timer
         return
     # get a task to run
-    task=dbo.getOne_task({fOPERSTATUS:sRUN,fIMPLSTATUS:sNORMAL,fISRUNNINGWORKER:False,fZMAPSTATUS:sCOMPLETE})
+    task=dbo.getOne_task({fOPERSTATUS:sRUN,fIMPLSTATUS:sWAITING,fZMAPSTATUS:sCOMPLETE})
 
     ##### timer end case 2: no task to run
     if task == None:
@@ -170,7 +170,7 @@ def doTask():
         return
 
     # it is comfired the task can be run, so adjust thread count, set the task is running
-    dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fISRUNNINGWORKER:True,fNEEDTOSYNC:True})
+    dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fIMPLSTATUS:sRUNNING,fNEEDTOSYNC:True})
 
     # do the job                
     mylog.log('Run Task:'+strid)
@@ -210,7 +210,7 @@ def doTask():
                     for item in r:                    
                         if item<least:
                             least=item
-                    dbo.update_task({f_ID:id},{fPROGRESS:least,fNEEDTOSYNC:True,fISRUNNINGWORKER:False})
+                    dbo.update_task({f_ID:id},{fPROGRESS:least,fNEEDTOSYNC:True,fIMPLSTATUS:sWAITING,fTHREADALLOT:0})
                 return
             new_demand=task_modi[fTHREADDEMAND]
             # readjust the thread count in case of modification
@@ -231,17 +231,17 @@ def doTask():
                     
 
     # task complete! change the status
-    dbo.update_task({f_ID:id},{fIMPLSTATUS:sCOMPLETE,fOPERSTATUS:sCOMPLETE,fNEEDTOSYNC:True,fPROGRESS:iptotal,fISRUNNINGWORKER:False})
+    dbo.update_task({f_ID:id},{fIMPLSTATUS:sCOMPLETE,fOPERSTATUS:sCOMPLETE,fNEEDTOSYNC:True,fPROGRESS:iptotal,fTHREADALLOT:0})
     ##### timer end case 7: task completed!!
 
 
 if __name__ == '__main__':
+    # todo:only one sample of this programme should be run
     # when startup, all the tasks should not be running
-    dbo.update_task({fIMPLSTATUS:{'$ne':sCOMPLETE}},{fISRUNNINGWORKER:False,fTHREADALLOT:0})
+    dbo.update_task({fIMPLSTATUS:sRUNNING},{fIMPLSTATUS:sWAITING,fTHREADALLOT:0,fNEEDTOSYNC:True})
     # set the global variables from the db
     load_task_inteval=3
     available_thread_count=100
-    last_log=''
     # every inteval,start a timer to find a task to run
     while True:
         timer = threading.Timer(0,doTask)

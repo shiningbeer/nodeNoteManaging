@@ -39,72 +39,22 @@ class daoNodeManager(object):
             return None
         return tks[0]
 
-        
-    def get_one_task_to_zmap(self):
-        coll = self.db.task
-        cur = coll.find({'operStatus':1,'zmap':0,'implStatus':0})
-        tks = []
-        for d in cur:
-            d['id'] = d['_id'].__str__()
-            d.pop('_id')
-            tks.append(d)
-        if len(tks)==0:
-            return None
-        return tks[0]
-    def get_one_task_to_execute(self):
-        coll = self.db.task
-        cur = coll.find({'operStatus':1,'zmap':1,'implStatus':0})
-        tks = []
-        for d in cur:
-            d['id'] = d['_id'].__str__()
-            d.pop('_id')
-            tks.append(d)
-        if len(tks)==0:
-            return None
-        return tks[0]
-    def modi_zmap_by_id(self,task_id,zmapStatus):
-        coll = self.db.task
-        oid = ObjectId(task_id)
-        return coll.update_many({'_id':oid}, {"$set": {'zmap': zmapStatus}})
-    def modi_implStatus_by_id(self,task_id,implStatus,errMsg):
-        coll = self.db.task
-        oid = ObjectId(task_id)
-        return coll.update({'_id':oid}, {"$set": {'implStatus': implStatus,'errMsg':errMsg,'syncStatus':0}})
-    
-    def modi_ipTotal_by_id(self,task_id,ipTotal):
-        coll = self.db.task
-        oid = ObjectId(task_id)
-        return coll.update({'_id':oid}, {"$set": {'ipTotal': ipTotal,'syncStatus':0}})
-    def record_progress(self,task_id,progress):
-        coll = self.db.task
-        oid = ObjectId(task_id)
-        return coll.update({'_id':oid}, {"$set": {'progress': progress,'syncStatus':0}})
-    
-    def get_new_operStatus(self,task_id):
-        coll = self.db.task
-        oid = ObjectId(task_id)
-        return coll.find_one({'_id':oid})['operStatus']
-    def get_progress(self,task_id):
-        coll = self.db.task
-        oid = ObjectId(task_id)
-        return coll.find_one({'_id':oid})['progress']
-    
-    def saveResult(self,tableName,document):
-        coll=self.db[tableName]
-        coll.insert_one(document)
-
-    def resetZmap(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'zmap': 0}})
-    def resetSync(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'syncStatus': 0}})
-    def resetImplStatus(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'implStatus': 0}})
-    def resetProgress(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'progress': 0}})
+#    def saveResult(self,tableName,document):
+#        coll=self.db[tableName]
+#        coll.insert_one(document)
+#
+#    def resetZmap(self):
+#        coll = self.db.task
+#        return coll.update_many({}, {"$set": {'zmap': 0}})
+#    def resetSync(self):
+#        coll = self.db.task
+#        return coll.update_many({}, {"$set": {'syncStatus': 0}})
+#    def resetImplStatus(self):
+#        coll = self.db.task
+#        return coll.update_many({}, {"$set": {'implStatus': 0}})
+#    def resetProgress(self):
+#        coll = self.db.task
+#        return coll.update_many({}, {"$set": {'progress': 0}})
 
 
 if __name__ == '__main__':
