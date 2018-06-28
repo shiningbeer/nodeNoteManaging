@@ -73,8 +73,7 @@ const task = {
     delete newNodeTask.ipRange
     var task = {
       ...newNodeTask,
-      zmap: 0,
-      syncStatus: 0,
+      needToSync:false,
     }
     dbo.task.createCol(nodeTaskId,(err,rest)=>{
       if (err){
@@ -121,7 +120,7 @@ const task = {
       return res.sendStatus(415)
     var update = {
       operStatus: status,
-      implStatus: 0
+      implStatus:'waiting'
     }
     dbo.task.update(taskId, update, (err, rest) => {
       err ? res.sendStatus(500) : res.sendStatus(200)

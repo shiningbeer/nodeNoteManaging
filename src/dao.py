@@ -39,29 +39,29 @@ class daoNodeManager(object):
             return None
         return tks[0]
 
-#    def saveResult(self,tableName,document):
-#        coll=self.db[tableName]
-#        coll.insert_one(document)
-#
-#    def resetZmap(self):
-#        coll = self.db.task
-#        return coll.update_many({}, {"$set": {'zmap': 0}})
-#    def resetSync(self):
-#        coll = self.db.task
-#        return coll.update_many({}, {"$set": {'syncStatus': 0}})
-#    def resetImplStatus(self):
-#        coll = self.db.task
-#        return coll.update_many({}, {"$set": {'implStatus': 0}})
-#    def resetProgress(self):
-#        coll = self.db.task
-#        return coll.update_many({}, {"$set": {'progress': 0}})
+    def saveResult(self,tableName,document):
+        coll=self.db[tableName]
+        coll.insert_one(document)
+
+    def resetZmap(self):
+        coll = self.db.task
+        return coll.update_many({}, {"$set": {'zmap': 0}})
+    def resetSync(self):
+        coll = self.db.task
+        return coll.update_many({}, {"$set": {'syncStatus': 0}})
+    def resetImplStatus(self):
+        coll = self.db.task
+        return coll.update_many({}, {"$set": {'implStatus':'waiting','operStatus':'run','taskName':'77--s7'}})
+    def resetProgress(self):
+        coll = self.db.task
+        return coll.update_many({}, {"$set": {'progress': 0}})
 
 
 if __name__ == '__main__':
     dbo=daoNodeManager()
     # dbo.resetZmap()
     
-    print dbo.resetSync()
+    # print dbo.resetSync()
     print dbo.resetProgress()
     print dbo.resetImplStatus()
     

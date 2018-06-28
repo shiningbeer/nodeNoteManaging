@@ -19,7 +19,7 @@ if sys.getdefaultencoding() != default_encoding:
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(message)s",
-    filename='./worklog.log',
+    filename='./zmapLog.log',
     filemode='a'
 )
 # my logging class
@@ -55,16 +55,19 @@ def zmapwork():
         # add to the task log
         dbo.pushArray_task({f_ID:id},{fKEYLOG:err_msg})
     def decrementZmapLimit():
+        global run_zmap_count
         lock.acquire()
         run_zmap_count=run_zmap_count-1
         lock.release()
 
     def incrementZmapLimit():
+        global run_zmap_count
         lock.acquire()
         run_zmap_count=run_zmap_count+1
         lock.release()
     
     # zmap run limit
+    global run_zmap_count
     if run_zmap_count<=0:
         mylog.log('Waiting other task to be done')
         return
@@ -77,15 +80,16 @@ def zmapwork():
         return
     # if there is a task 
     decrementZmapLimit()
-    id=task['id']
-    nodeTaskId=task['nodeTaskId']
-    plugin=task['plugin']
+    id=task[f_ID]
+    strid=task[f_ID].__str__()
+    nodeTaskId=task[fNODETASKID]
+    plugin=task[fPLUGIN]
     port=plugin['port']
     if os.path.exists('./targets/'+nodeTaskId):
-        mylog.log(u'Implement Zmap Task:'+id)
+        mylog.log(u'Implement Zmap Task:'+strid)
         # use system command to run zmap
         try:
-            os.system('zmap -p '+port+' -B 5M -w ./targets/'+nodeTaskId+' -o ./zr/'+id)
+            os.system('zmap -p '+port+' -B 5M -w ./targets/'+nodeTaskId+' -o ./zr/'+strid)
         except:
             mylog.log('can\'t run zmap, please ensure zmap is installed!')
             incrementZmapLimit()
@@ -93,7 +97,7 @@ def zmapwork():
         
         # compute the count of the result
         count=0
-        for line in  open('zr/'+id, 'r'): 
+        for line in  open('zr/'+strid, 'r'): 
             count=count+1
         # after work done, mark the task that zmap has finished, and store the count of result
         dbo.update_task({f_ID:id},{fZMAPSTATUS:sCOMPLETE,fIPTOTAL:count,fNEEDTOSYNC:True})
