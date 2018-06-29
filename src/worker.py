@@ -82,7 +82,6 @@ dbo=dbo()
 mylog=logMsg('')
 # global variables
 useable_threads=100
-record_step=200
 def recordResult(result,tableName,ip):
     '''
     record the result into database.
@@ -98,18 +97,24 @@ def recordResult(result,tableName,ip):
             id=getId()
             result['_id']=ObjectId(id) 
             dbo.saveResult(tableName,result)
-def markTaskErr(id,name,err_msg):        
-    ''' mark the task as err and record the err msg
+def importantLog(tid,tname,tmsg,mark_err):        
+    ''' log important event both in log file and the task's db keyLog field
     args:
-        id: task id
-        err_msg: the err msg need to logging
+        tid: task id, objectId
+        tname:task name, string
+        tmsg:the log msg,string
+        mark_err: if mark the task as wrong, boolean
     '''
-    mylog.log('Task:'+id.__str__(),+'('+name+')--'+err_msg)
-    # mark the task as wrong
-    dbo.update_task({f_ID:id},{fIMPLSTATUS:sWRONG,fNEEDTOSYNC:True,fTHREADALLOT:0})
+    # log in file
+    logMsg='Task:'+tid.__str__()+'('+tname+')--'+tmsg
+    mylog.log(logMsg)
     # add to the task log
     nowTime=datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
-    dbo.pushArray_task({f_ID:id},{fKEYLOG:nowTime+err_msg})
+    dbo.pushArray_task({f_ID:tid},{fKEYLOG:nowTime+tmsg})
+    # mark the task as wrong
+    if mark_err:
+        dbo.update_task({f_ID:tid},{fIMPLSTATUS:sWRONG,fNEEDTOSYNC:True,fTHREADALLOT:0})
+    print nowTime+logMsg
 def doTask():
     '''
     get suitable tasks to run
@@ -144,17 +149,17 @@ def doTask():
         exec("from plugins import " + plugin + " as scanning_plugin")
     ##### timer end case 3 : can't find plugin
     except:
-        markTaskErr(id,'can\'t find plugin: '+plugin)
+        importantLog(id,task_name,'can\'t find plugin: '+plugin,True)
         # end of this fucntion and thus the timer
         return
     ##### timer end case 4 plugin does not has the scan function
     if not scanning_plugin.scan:
-        markTaskErr(id,'plugin: '+plugin+' have no scan function!')
+        importantLog(id,task_name,'plugin: '+plugin+' have no scan function!',True)
         # end of this fucntion and thus the timer
         return
     ##### timer end case 5 can't find zmap result file
     if not os.path.exists('./zr/'+strid):
-        markTaskErr(id,'cant find zmap result file!')
+        importantLog(id,task_name,'cant find zmap result file!',True)
         # end of this fucntion and thus the timer
         return
     # compute the thread count
@@ -163,19 +168,18 @@ def doTask():
     thread_allot=0
     if thread_demand>=useable_threads:
         # allot all the available to this task
+        
         thread_allot=useable_threads
         useable_threads=0
     else:
         # allot its demand count
         thread_allot=thread_demand
-        useable_threads=available_thread_count-thread_demand
+        useable_threads=useable_threads-thread_demand
     # it is comfired the task can be run, so adjust thread count, set the task is running
     dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fIMPLSTATUS:sRUNNING,fNEEDTOSYNC:True})
 
     # do the job, log first                
-    mylog.log('Run Task:'+strid+', thread alloted with '+str(thread_allot)+'.')
-    nowTime=datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
-    dbo.pushArray_task({f_ID:id},{fKEYLOG:nowTime+'Task run. Thread alloted with '+str(thread_allot)+'.'})
+    importantLog(id,task_name,'Run with '+str(thread_allot)+' threads',False)
     # use mutiple threads to run the plugin's scan to do this job
     dp=multiThread(thread_allot,scanning_plugin.scan,recordResult)
     index=0   
@@ -187,10 +191,10 @@ def doTask():
         if index<progress:
             continue
         # one thread is dispatched to one line of ip, the params here are passed to thread functions
-        dp.dispatch((line,),(node_task_id,line),index,120)
+        dp.dispatch((line,),(node_task_id,line),index,20)
         stepCounter=stepCounter+1
-        # record the progress
-        if stepCounter==record_step:
+        # record the progress,every the count of useable_threads
+        if stepCounter==useable_threads:
             r=dp.snapThreadPayloads() # take the payloads all the thread is taking presently
             # find the least
             if r!=None:
@@ -205,6 +209,7 @@ def doTask():
             task_modi=dbo.getOne_task({f_ID:id})
             ##### timer end case 6 : task paused by new instruction
             if task_modi[fOPERSTATUS]!=sRUN:
+                importantLog(id,task_name,'Paused.',False)
                 # record progress
                 r=dp.snapThreadPayloads()
                 if r!=None:
@@ -213,30 +218,32 @@ def doTask():
                         if item<least:
                             least=item
                     dbo.update_task({f_ID:id},{fPROGRESS:least,fNEEDTOSYNC:True,fIMPLSTATUS:sWAITING,fTHREADALLOT:0})
-                    nowTime=datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
-                    dbo.pushArray_task({f_ID:id},{fKEYLOG:nowTime+'Task paused.'})
-                    ???????没记录，然后这里应该在log文件里也记录一下
+                useable_threads=100    
                 return
             new_demand=task_modi[fTHREADDEMAND]
-            # readjust the thread count in case of modification
-            if new_demand<thread_allot:
-                surplus=thread_allot-new_demand 
-                useable_threads=available_thread_count+surplus 
-                dp.setMaxThreadCount(new_demand)
-            if new_demand>thread_allot:
-                if new_demand-thread_allot>=useable_threads:
-                    thread_allot=thread_allot+useable_threads 
-                    useable_threads=0
-                    dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fNEEDTOSYNC:True})
-                else:
-                    additional=new_demand-thread_allot 
-                    useable_threads=available_thread_count-additional 
-                    thread_allot=thread_allot+additional 
-                    dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fNEEDTOSYNC:True})
+            # thread demand modified 
+            if new_demand!=thread_demand:
+                if new_demand<thread_allot:
+                    surplus=thread_allot-new_demand 
+                    useable_threads=useable_threads+surplus 
+                    dp.setMaxThreadCount(new_demand)
+                    thread_allot=new_demand
+                if new_demand>thread_allot:
+                    if new_demand-thread_allot>=useable_threads:
+                        thread_allot=thread_allot+useable_threads 
+                        useable_threads=0
+                    else:
+                        additional=new_demand-thread_allot 
+                        useable_threads=useable_threads-additional 
+                        thread_allot=thread_allot+additional
+                thread_demand=new_demand
+                dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fNEEDTOSYNC:True})
+                importantLog(id,task_name,'Threads changed to '+str(thread_allot)+'.',False)
                     
 
     # task complete! change the status
     dbo.update_task({f_ID:id},{fIMPLSTATUS:sCOMPLETE,fOPERSTATUS:sCOMPLETE,fNEEDTOSYNC:True,fPROGRESS:iptotal,fTHREADALLOT:0})
+    useable_threads=100
     ##### timer end case 7: task completed!!
 
 
@@ -246,8 +253,8 @@ if __name__ == '__main__':
     dbo.update_task({fIMPLSTATUS:sRUNNING},{fIMPLSTATUS:sWAITING,fTHREADALLOT:0,fNEEDTOSYNC:True})
     # set the global variables from the db
     load_task_inteval=3
+    
     useable_threads=100
-    record_step=100
     # every inteval,start a timer to find a task to run
     while True:
         timer = threading.Timer(0,doTask)
