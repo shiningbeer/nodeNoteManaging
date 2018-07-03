@@ -94,17 +94,17 @@ var task = {
     },
     get_unSync_tasks: (callback) => {
         var wherestr = {
-            syncStatus: 0
+            needToSync:true
         }
         find(TABLES.task, wherestr, callback)
     },
-    mark_sync: (callback) => {
+    mark_sync_complete: (callback) => {
         var wherestr = {
-            syncStatus: 0
+            needToSync:true
         }
         var updatestr = {
             $set: {
-                syncStatus: 1
+                needToSync:false
             }
         }
         mod(TABLES.task, wherestr, updatestr, callback)

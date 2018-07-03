@@ -132,7 +132,7 @@ const task = {
         res.sendStatus(500)
       else {
         res.json(result)
-        dbo.task.mark_sync((err, result) => {})
+        dbo.task.mark_sync_complete((err, result) => {})
       }
     })
   },
