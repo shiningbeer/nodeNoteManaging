@@ -1,5 +1,4 @@
 /node_modules
 *.pyc
-/src/targets/
 /src/zr/
 /src/worklog.log
