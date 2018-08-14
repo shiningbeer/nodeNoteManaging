@@ -1,4 +1,5 @@
 /node_modules
 *.pyc
 /src/zr/
-/src/worklog.log
+/src/work.mylog
+/src/zmap.mylog
