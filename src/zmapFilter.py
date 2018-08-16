@@ -50,7 +50,7 @@ def zmapwork():
     # if there is a task 
     decrementZmapLimit()
     id=task[f_ID]
-    task_name=task[fNAME]
+    task_name=task[fTASKNAME]
     strid=task[f_ID].__str__()
     nodeTaskId=task[fNODETASKID]
     plugin=task[fPLUGIN]
