@@ -4,7 +4,7 @@ import json
 import sys
 import threading
 from dao import daoNodeManager as dbo
-from mylog import myLog
+from myLog import myLog
 from const import *
 
 from time import sleep
