@@ -4,7 +4,7 @@ import json
 import sys
 import threading
 from dao import daoNodeManager as dbo
-from myLog import myLog
+from mylog import myLog
 from const import *
 
 from time import sleep
@@ -143,7 +143,7 @@ def doTask():
     dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fIMPLSTATUS:sRUNNING,fNEEDTOSYNC:True})
 
     # do the job, log first                
-    myLog.importantLog(id,task_name,'Task Run with '+str(thread_allot)+' threads',False)
+    mylog.importantLog(id,task_name,'Task Run with '+str(thread_allot)+' threads',False)
     # use mutiple threads to run the plugin's scan to do this job
     dp=multiThread(thread_allot,scanning_plugin.scan,recordResult)
     index=0   
