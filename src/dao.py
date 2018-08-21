@@ -38,6 +38,15 @@ class daoNodeManager(object):
         if len(tks)==0:
             return None
         return tks[0]
+    def getOne_task_limit_fields(self,find_dict,field_dict):
+        coll=self.db[TASK]
+        cur = coll.find(find_dict,field_dict)
+        tks = []
+        for d in cur:
+            tks.append(d)
+        if len(tks)==0:
+            return None
+        return tks[0]
 
     def saveResult(self,tableName,document):
         coll=self.db[tableName]

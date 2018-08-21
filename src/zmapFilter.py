@@ -38,15 +38,14 @@ def zmapwork():
     # zmap run limit
     global run_zmap_count
     if run_zmap_count<=0:
-        mylog.commonLog('Waiting other task to be done')
+        # mylog.LogInJustScreen('Waiting other task to be done')
         return
-
-    task=dbo.getOne_task({fOPERSTATUS:sRUN,fZMAPSTATUS:sWAITING})
+    task=dbo.getOne_task({fZMAPRUNNING:False,fGOWRONG:False,fZMAPCOMPLETE:False,fPAUSED:False})
 
     # if no task, print the msg and end this
     if task == None:
-        mylog.commonLog('No Task Now!')
-        return
+        mylog.LogInJustScreen('No Task Now!')
+        return    
     # if there is a task 
     decrementZmapLimit()
     id=task[f_ID]
@@ -55,31 +54,48 @@ def zmapwork():
     nodeTaskId=task[fNODETASKID]
     plugin=task[fPLUGIN]
     port=plugin['port']
-    if os.path.exists('./targets/'+nodeTaskId):
-        mylog.importantLog(id,task_name,'Run Zmap.',False)
-        # use system command to run zmap
-        try:
-            os.system('zmap -p '+port+' -B 5M -w ./targets/'+nodeTaskId+' -o ./zr/'+strid)
-        except:
-            mylog.importantLog(id,task_name,'Run Zmap Failed!',True)
-            incrementZmapLimit()
-            return
-        
-        # compute the count of the result
-        count=0
-        for line in  open('zr/'+strid, 'r'): 
-            count=count+1
-        # after work done, mark the task that zmap has finished, and store the count of result
-        dbo.update_task({f_ID:id},{fZMAPSTATUS:sCOMPLETE,fIPTOTAL:count,fNEEDTOSYNC:True})
-        incrementZmapLimit()
-    else:
-        mylog.importantLog(id,task_name,'Can\'t find ip target file: ./targets/'+nodeTaskId)
-        incrementZmapLimit()
+    ipRange=task[fZMAPRANGE]
+    total=task[fZMAPTOTAL]
+    # start from progress
+    progress=task[fZMAPPROGRESS]
 
+    mylog.LogInScreenAndFileAndDB(id,task_name,'Zmap Work Run.',False)
+
+    count=-1
+    for ip in ipRange:
+        count=count+1        
+        if count<progress:
+            continue
+        try:
+            os.system('zmap -p '+port+' -B 5M '+ip+' -o ./zr/'+strid)
+        except:
+            mylog.LogInScreenAndFileAndDB(id,task_name,'Run Zmap Failed!',True)
+            incrementZmapLimit()
+            # exit timer when meets error
+            return
+
+        for line in  open('zr/'+strid, 'r'):
+            line=line.strip()
+            dbo.pushArray_task({f_ID:id},{fSCANRANGE:line})
+        # sleep(0.1)
+        mylog.LogInJustScreen('Total Progress'+str(count+1)+'/'+str(total))
+        dbo.update_task({f_ID:id},{fZMAPPROGRESS:count+1,fNEEDTOSYNC:True})
+        task_modi=dbo.getOne_task_limit_fields({f_ID:id},{fPAUSED:1})
+        paused=task_modi[fPAUSED]
+        if paused:
+            mylog.LogInScreenAndFileAndDB(id,task_name,'Zmap Work Paused.',False)
+            incrementZmapLimit()
+            # exit timer when paused
+            return
+    # zmap is complete
+    dbo.update_task({f_ID:id},{fZMAPCOMPLETE:True,fNEEDTOSYNC:True})
+    mylog.LogInScreenAndFileAndDB(id,task_name,'Zmap Work complete.',False)
+    incrementZmapLimit()
+   
 if __name__ == '__main__':
     # todo:only one sample of this programme should be run
     # at the start, set all task no running zmap
-    dbo.update_task({fZMAPSTATUS:sRUNNING},{fZMAPSTATUS:sWAITING,fNEEDTOSYNC:True})
+    dbo.update_task({fZMAPRUNNING:True},{fZMAPRUNNING:False,fNEEDTOSYNC:True})
     task_inteval=3
     run_zmap_count=1
     # every inteval,start a timer to find a task to run

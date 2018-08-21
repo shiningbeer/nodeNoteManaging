@@ -1,18 +1,25 @@
 # const of fields ,the starting f stands for fields
-fIMPLSTATUS='implStatus'
-fOPERSTATUS='operStatus'
-fZMAPSTATUS='zmapStatus'
-fPROGRESS='progress'
+
+fZMAPRUNNING='zmapRunning'
+fNEEDTOSYNC='needToSync'
+fGOWRONG='goWrong'
+fZMAPCOMPLETE='zmapComplete'
+fPAUSED='paused'
 f_ID='_id'
 fNODETASKID='nodeTaskId'
+fTASKNAME='taskName'
 fPLUGIN='plugin'
 fNAME='name'
-fIPTOTAL='ipTotal'
+fZMAPRANGE='zmapRange'
+fZMAPPROGRESS='zmapProgress'
+fSCANRANGE='scanRange'
+fZMAPCOMPLETE='zmapComplete'
+
 fTHREADDEMAND='threadsDemand'
 fTHREADALLOT='threadsAllot'
 fKEYLOG='keyLog'
-fNEEDTOSYNC='needToSync'
-fTASKNAME='taskName'
+fZMAPTOTAL='zmapTotal'
+
 #const of status values, the starting s stands for status
 sCOMPLETE='complete'
 sNEW='new'

@@ -44,6 +44,11 @@ var find = (col, wherestr = {}, callback) => {
         callback(err, result)
     });
 }
+var find_specific_fields = (col, wherestr = {}, fields={},callback) => {
+    dbo.collection(col).find(wherestr,fields).toArray((err, result) => {
+        callback(err, result)
+    });
+}
 
 
 

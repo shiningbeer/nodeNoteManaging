@@ -61,21 +61,24 @@ const task = {
       return res.sendStatus(415)
 
     //todo: verify validity of newNodeTask
-    var {
-      ipRange,
-      nodeTaskId
-    } = newNodeTask
-    let stringIp = ''
-    for (var ip of ipRange) {
-      stringIp = stringIp + ip + '\n'
-    }
-    fs.writeFileSync('./targets/' + nodeTaskId, stringIp)
-    delete newNodeTask.ipRange
+    newNodeTask.nodeTaskId = newNodeTask._id
+    newNodeTask.zmapRunning = false 
+    delete newNodeTask.node
+    delete newNodeTask._id
+    delete newNodeTask.taskReceived
+    delete newNodeTask.needToNotifyOperChanged
+    delete newNodeTask.scanRangeReceived
     var task = {
       ...newNodeTask,
       needToSync:false,
     }
-    dbo.task.createCol(nodeTaskId,(err,rest)=>{
+    dbo.task.createCol(newNodeTask.nodeTaskId+'zr',(err,rest)=>{
+      if (err){
+        res.sendStatus(500)
+        return
+      }
+    })
+    dbo.task.createCol(newNodeTask.nodeTaskId+'sr',(err,rest)=>{
       if (err){
         res.sendStatus(500)
         return
@@ -114,13 +117,13 @@ const task = {
   changeOper: (req, res) => {
     var {
       taskId,
-      status
+      paused,
     } = req.body
-    if (taskId == null || status == null)
+    if (taskId == null ||  paused == null)
       return res.sendStatus(415)
     var update = {
-      operStatus: status,
-      implStatus:'waiting'
+      paused,
+      goWrong:false
     }
     dbo.task.update(taskId, update, (err, rest) => {
       err ? res.sendStatus(500) : res.sendStatus(200)
