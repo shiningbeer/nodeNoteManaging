@@ -67,6 +67,21 @@ var result = {
 
             callback(err,err?0:result.count)
         });
+    },
+
+    createCol:(name,callback)=>{
+        dbo.createCollection(name,(err,result)=>{callback(err,result)})
+    },
+    delCollection:(tName,callback)=>{
+        dbo.collection(tName).drop(callback)
+    },
+    getZmapUnsentResult:(tName,callback)=>{
+        dbo.collection(tName).find({sent:false}).toArray((err, result) => {
+            callback(err, err?[]:result)
+            for(var xx of result){
+                dbo.collection(tName).updateMany({_id:xx._id},{$set:{sent:true}})
+            }
+        })
     }
 }
 
@@ -76,15 +91,14 @@ var task = {
     add: (newNodeTask, callback) => {
         insert(TABLES.task, newNodeTask, callback)
     },
-    createCol:(name,callback)=>{
-        dbo.createCollection(name,(err,result)=>{callback(err,result)})
-    },
+
     del: (taskId, callback) => {
         var wherestr = {
             nodeTaskId: taskId
         }
         del(TABLES.task, wherestr, callback)
     },
+
     update: (taskId, update, callback) => {
         var wherestr = {
             nodeTaskId: taskId

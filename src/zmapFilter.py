@@ -66,19 +66,21 @@ def zmapwork():
         count=count+1        
         if count<progress:
             continue
-        try:
-            os.system('zmap -p '+port+' -B 5M '+ip+' -o ./zr/'+strid)
-        except:
-            mylog.LogInScreenAndFileAndDB(id,task_name,'Run Zmap Failed!',True)
-            incrementZmapLimit()
-            # exit timer when meets error
-            return
+        # try:
+        #     os.system('zmap -p '+port+' -B 5M '+ip+' -o ./zr/'+strid)
+        # except:
+        #     mylog.LogInScreenAndFileAndDB(id,task_name,'Run Zmap Failed!',True)
+        #     incrementZmapLimit()
+        #     # exit timer when meets error
+        #     return
 
-        for line in  open('zr/'+strid, 'r'):
-            line=line.strip()
-            dbo.pushArray_task({f_ID:id},{fSCANRANGE:line})
-        # sleep(0.1)
-        mylog.LogInJustScreen('Total Progress'+str(count+1)+'/'+str(total))
+        # for line in  open('zr/'+strid, 'r'):
+        #     line=line.strip()
+        #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
+
+        dbo.saveResult(nodeTaskId+'zr',{'ip':count+1,'sent':False})
+        sleep(0.1)
+        mylog.LogInJustScreen('Total Progress:  '+str(count+1)+'/'+str(total))
         dbo.update_task({f_ID:id},{fZMAPPROGRESS:count+1,fNEEDTOSYNC:True})
         task_modi=dbo.getOne_task_limit_fields({f_ID:id},{fPAUSED:1})
         paused=task_modi[fPAUSED]

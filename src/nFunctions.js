@@ -68,35 +68,31 @@ const task = {
     delete newNodeTask.taskReceived
     delete newNodeTask.needToNotifyOperChanged
     delete newNodeTask.scanRangeReceived
+    delete newNodeTask.scanResult
+    delete newNodeTask.zmapResult
+    delete newNodeTask.syncedToNodeSucessful
+    delete newNodeTask.syncTime
+
     var task = {
       ...newNodeTask,
       needToSync:false,
     }
-    dbo.task.createCol(newNodeTask.nodeTaskId+'zr',(err,rest)=>{
-      if (err){
-        res.sendStatus(500)
-        return
-      }
-    })
-    dbo.task.createCol(newNodeTask.nodeTaskId+'sr',(err,rest)=>{
-      if (err){
-        res.sendStatus(500)
-        return
-      }
-    })
-    dbo.task.add(task, (err, rest) => {
-      err ? res.sendStatus(500) : res.sendStatus(200)
-    })
-
+    dbo.result.createCol(newNodeTask.nodeTaskId+'zr',(err,rest)=>{})
+    dbo.result.createCol(newNodeTask.nodeTaskId+'sr',(err,rest)=>{})
+    dbo.task.add(task, (err, rest) => {})
+    res.sendStatus(200)
 
   },
   delete: (req, res) => {
     var nodeTaskId = req.body.nodeTaskId
     if (nodeTaskId == null)
       return res.sendStatus(415)
-    dbo.task.del(nodeTaskId, (err, rest) => {
-      err ? res.sendStatus(500) : res.sendStatus(200)
-    })
+    //here i dont judge if the db go wrong
+    dbo.task.del(nodeTaskId, (err, rest) => {})
+    dbo.result.delCollection(nodeTaskId+'zr', (err, rest) => {})
+    dbo.result.delCollection(nodeTaskId+'sr', (err, rest) => {})
+
+    res.sendStatus(200)
   },
   getResult: (req, res) => {
     let {
@@ -130,12 +126,32 @@ const task = {
     })
   },
   syncTask: (req, res) => {
-    dbo.task.get_unSync_tasks((err, result) => {
+    dbo.task.get_unSync_tasks(async (err, result) => {
       if (err)
         res.sendStatus(500)
       else {
+        for (var task of result){
+          delete task.scanRange
+          delete task.zmapRange
+
+          var zmapResult = await new Promise((resolve, reject) => {
+            dbo.result.getZmapUnsentResult(task.nodeTaskId+'zr',(err, result2) => {
+              var zmapResult=[]
+              if (err)
+                res.sendStatus(500)
+              else{
+                for(var ip of result2){
+                  zmapResult.push(ip.ip)
+                }
+                resolve(zmapResult)
+              }
+            })
+          })
+          task.zmapResult=zmapResult
+          
+        }
         res.json(result)
-        dbo.task.mark_sync_complete((err, result) => {})
+        dbo.task.mark_sync_complete((err, result) => {})        
       }
     })
   },
