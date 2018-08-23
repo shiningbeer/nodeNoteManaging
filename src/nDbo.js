@@ -24,8 +24,8 @@ var insertCol = (col, insobj, callback) => {
     })
 }
 
-var createCol=(name,callback)=>{
-    dbo.createCollection(name,(err,result)=>{callback(err,result)})
+var createCol = (name, callback) => {
+    dbo.createCollection(name, (err, result) => { callback(err, result) })
 }
 
 var deleteCol = (col, wherestr, callback) => {
@@ -34,11 +34,11 @@ var deleteCol = (col, wherestr, callback) => {
     })
 }
 
-var dropCol= (col,callback)=>{
+var dropCol = (col, callback) => {
     dbo.collection(col).drop(callback)
 }
 
-var updateCol= (col,wherestr, update, callback) => {
+var updateCol = (col, wherestr, update, callback) => {
     var updatestr = {
         $set: update
     }
@@ -47,13 +47,17 @@ var updateCol= (col,wherestr, update, callback) => {
     })
 }
 
+var findoneCol = (col, where = {}, callback) => {
+    dbo.collection(col).findOne(where, (err, result) => {
+        callback(err, result)
+    });
 
-
-/* basic crub operation */
-var insert = (col, insobj, callback) => {
-    dbo.collection(col).insertOne(insobj, (err, rest) => {
-        callback(err, rest)
-    })
+    /* basic crub operation */
+    var insert = (col, insobj, callback) => {
+        dbo.collection(col).insertOne(insobj, (err, rest) => {
+            callback(err, rest)
+        })
+    }
 }
 
 var del = (col, wherestr, callback) => {
@@ -75,8 +79,8 @@ var find = (col, wherestr = {}, callback) => {
         callback(err, result)
     });
 }
-var find_specific_fields = (col, wherestr = {}, fields={},callback) => {
-    dbo.collection(col).find(wherestr,fields).toArray((err, result) => {
+var find_specific_fields = (col, wherestr = {}, fields = {}, callback) => {
+    dbo.collection(col).find(wherestr, fields).toArray((err, result) => {
         callback(err, result)
     });
 }
@@ -90,27 +94,27 @@ var find_specific_fields = (col, wherestr = {}, fields={},callback) => {
 var result = {
     getLimit: (tName, skip, limit, callback) => {
         dbo.collection(tName).find().skip(skip).limit(limit).toArray((err, result) => {
-            callback(err, err?[]:result)
+            callback(err, err ? [] : result)
         });
     },
-    getCount:(tName,callback)=>{
-        dbo.collection(tName).stats((err,result)=>{
+    getCount: (tName, callback) => {
+        dbo.collection(tName).stats((err, result) => {
 
-            callback(err,err?0:result.count)
+            callback(err, err ? 0 : result.count)
         });
     },
 
-    createCol:(name,callback)=>{
-        dbo.createCollection(name,(err,result)=>{callback(err,result)})
+    createCol: (name, callback) => {
+        dbo.createCollection(name, (err, result) => { callback(err, result) })
     },
-    delCollection:(tName,callback)=>{
+    delCollection: (tName, callback) => {
         dbo.collection(tName).drop(callback)
     },
-    getZmapUnsentResult:(tName,callback)=>{
-        dbo.collection(tName).find({sent:false}).toArray((err, result) => {
-            callback(err, err?[]:result)
-            for(var xx of result){
-                dbo.collection(tName).updateMany({_id:xx._id},{$set:{sent:true}})
+    getZmapUnsentResult: (tName, callback) => {
+        dbo.collection(tName).find({ sent: false }).toArray((err, result) => {
+            callback(err, err ? [] : result)
+            for (var xx of result) {
+                dbo.collection(tName).updateMany({ _id: xx._id }, { $set: { sent: true } })
             }
         })
     }
@@ -144,17 +148,17 @@ var task = {
     },
     get_unSync_tasks: (callback) => {
         var wherestr = {
-            needToSync:true
+            needToSync: true
         }
         find(TABLES.task, wherestr, callback)
     },
     mark_sync_complete: (callback) => {
         var wherestr = {
-            needToSync:true
+            needToSync: true
         }
         var updatestr = {
             $set: {
-                needToSync:false
+                needToSync: false
             }
         }
         mod(TABLES.task, wherestr, updatestr, callback)
@@ -246,6 +250,7 @@ module.exports = {
     deleteCol,
     dropCol,
     updateCol,
+    findoneCol,
     //old
     result,
     task,

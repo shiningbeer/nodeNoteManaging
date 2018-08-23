@@ -71,7 +71,7 @@ def zmapwork():
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
 
         dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})
-        sleep(0.1)
+        sleep(5)
         print count+1
         dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1,fNEEDTOSYNC:True})
         task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})

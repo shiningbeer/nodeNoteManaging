@@ -13,7 +13,7 @@ const myMiddleWare = {
   verifyToken: (req, res, next) => {
     //中间件总是执行两次，其中有一次没带上我的数据，所以忽略掉其中一次
     if (req.get('access-control-request-method') == null) {
-      if(req.originalUrl!='/task/syncTask')
+      if (req.originalUrl != '/task/syncTask')
         console.log(req.originalUrl + ' has been accessed by %s at %s', req.ip, moment(Date.now()).format('YYYY-MM-DD HH:mm'))
       if (req.originalUrl != '/user/gettoken') {
         var token = req.get('token')
@@ -50,46 +50,51 @@ const user = {
     } else
       return res.sendStatus(401)
   },
-  add: () => {},
-  delete: () => {},
+  add: () => { },
+  delete: () => { },
 }
 
-const zmapTask={
-  add:(req, res) => {
+const zmapTask = {
+  add: (req, res) => {
     var task = req.body.task
     if (task == null)
       return res.sendStatus(415)
     var newtask = {
       ...task,
-      needToSync:false,
-      running:false,
+      needToSync: false,
+      running: false,
     }
-    dbo.insertCol('zmapTask',newtask, (err, rest) => {})
+    dbo.insertCol('zmapTask', newtask, (err, rest) => { })
     res.sendStatus(200)
   },
-  delete:(req, res) => {
+  delete: (req, res) => {
     var taskId = req.body.taskId
     if (taskId == null)
       return res.sendStatus(415)
-    dbo.deleteCol('zmapTask',{taskId}, (err, rest) => {})
-    dbo.dropCol(taskId+'--zr', (err, rest) => {})
+    dbo.deleteCol('zmapTask', { taskId }, (err, rest) => { })
+    dbo.dropCol(taskId + '--zr', (err, rest) => { })
     res.sendStatus(200)
   },
-  syncCommand:(req, res) => {
-    var {taskId,paused,} = req.body
-    if (taskId == null ||  paused == null)
+  syncCommand: (req, res) => {
+    var { taskId, paused, } = req.body
+    if (taskId == null || paused == null)
       return res.sendStatus(415)
     var update = {
       paused,
-      goWrong:false
+      goWrong: false
     }
-    dbo.updateCol('zmapTask',{taskId}, update, (err, rest) => {
+    dbo.updateCol('zmapTask', { taskId }, update, (err, rest) => {
       err ? res.sendStatus(500) : res.sendStatus(200)
     })
   },
-  syncProgress:(req, res) => {
+  syncProgress: (req, res) => {
     console.log(req.body)
-    res.sendStatus(200)
+    var { taskId } = req.body
+    dbo.findoneCol('zmapTask', { taskId }, (err, rest) => {
+      console.log(rest)
+      res.json(rest)
+    })
+
   },
 }
 
@@ -104,8 +109,8 @@ const task = {
     if (nodeTaskId == null || skip == null || limit == null)
       return res.sendStatus(415)
     dbo.result.getLimit(nodeTaskId, skip, limit, (err, result1) => {
-      dbo.result.getCount(nodeTaskId,(err, result2) => {
-        let result={count:result2,samples:result1}
+      dbo.result.getCount(nodeTaskId, (err, result2) => {
+        let result = { count: result2, samples: result1 }
         console.log(err)
         err ? res.sendStatus(500) : res.json(result)
       })
@@ -117,28 +122,28 @@ const task = {
       if (err)
         res.sendStatus(500)
       else {
-        for (var task of result){
+        for (var task of result) {
           delete task.scanRange
           delete task.zmapRange
 
           var zmapResult = await new Promise((resolve, reject) => {
-            dbo.result.getZmapUnsentResult(task.nodeTaskId+'zr',(err, result2) => {
-              var zmapResult=[]
+            dbo.result.getZmapUnsentResult(task.nodeTaskId + 'zr', (err, result2) => {
+              var zmapResult = []
               if (err)
                 res.sendStatus(500)
-              else{
-                for(var ip of result2){
+              else {
+                for (var ip of result2) {
                   zmapResult.push(ip.ip)
                 }
                 resolve(zmapResult)
               }
             })
           })
-          task.zmapResult=zmapResult
-          
+          task.zmapResult = zmapResult
+
         }
         res.json(result)
-        dbo.task.mark_sync_complete((err, result) => {})        
+        dbo.task.mark_sync_complete((err, result) => { })
       }
     })
   },
@@ -164,7 +169,7 @@ const plugin = {
       err ? res.sendStatus(500) : res.sendStatus(200)
     })
   },
-  ifHave: () => {},
+  ifHave: () => { },
   get: (req, res) => {
     let plugins
     try {
