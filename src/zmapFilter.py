@@ -40,26 +40,18 @@ def zmapwork():
     if run_zmap_count<=0:
         # mylog.LogInJustScreen('Waiting other task to be done')
         return
-    task=dbo.getOne_task({fZMAPRUNNING:False,fGOWRONG:False,fZMAPCOMPLETE:False,fPAUSED:False})
-
+    task=dbo.findOne('zmapTask',{fRUNNING:False,fGOWRONG:False,fCOMPLETE:False,fPAUSED:False})
     # if no task, print the msg and end this
     if task == None:
         mylog.LogInJustScreen('No Task Now!')
         return    
     # if there is a task 
     decrementZmapLimit()
-    id=task[f_ID]
-    task_name=task[fTASKNAME]
-    strid=task[f_ID].__str__()
-    nodeTaskId=task[fNODETASKID]
-    plugin=task[fPLUGIN]
-    port=plugin['port']
-    ipRange=task[fZMAPRANGE]
-    total=task[fZMAPTOTAL]
+    taskId=task[fTASKID]
+    port=task[fPORT]
+    ipRange=task[fIPRANGE]
     # start from progress
-    progress=task[fZMAPPROGRESS]
-
-    mylog.LogInScreenAndFileAndDB(id,task_name,'Zmap Work Run.',False)
+    progress=task[fPROGRESS]
 
     count=-1
     for ip in ipRange:
@@ -78,26 +70,25 @@ def zmapwork():
         #     line=line.strip()
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
 
-        dbo.saveResult(nodeTaskId+'zr',{'ip':count+1,'sent':False})
+        dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})
         sleep(0.1)
-        mylog.LogInJustScreen('Total Progress:  '+str(count+1)+'/'+str(total))
-        dbo.update_task({f_ID:id},{fZMAPPROGRESS:count+1,fNEEDTOSYNC:True})
-        task_modi=dbo.getOne_task_limit_fields({f_ID:id},{fPAUSED:1})
+        print count+1
+        dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1,fNEEDTOSYNC:True})
+        task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})
         paused=task_modi[fPAUSED]
         if paused:
-            mylog.LogInScreenAndFileAndDB(id,task_name,'Zmap Work Paused.',False)
+            dbo.update('zmapTask',{fTASKID:taskId},{fRUNNING:False})
             incrementZmapLimit()
             # exit timer when paused
             return
     # zmap is complete
-    dbo.update_task({f_ID:id},{fZMAPCOMPLETE:True,fNEEDTOSYNC:True})
-    mylog.LogInScreenAndFileAndDB(id,task_name,'Zmap Work complete.',False)
+    dbo.update('zmapTask',{fTASKID:taskId},{fCOMPLETE:True,fNEEDTOSYNC:True,fRUNNING:False})
     incrementZmapLimit()
    
 if __name__ == '__main__':
     # todo:only one sample of this programme should be run
     # at the start, set all task no running zmap
-    dbo.update_task({fZMAPRUNNING:True},{fZMAPRUNNING:False,fNEEDTOSYNC:True})
+    dbo.update('zmapTask',{fRUNNING:True},{fRUNNING:False,fNEEDTOSYNC:True})
     task_inteval=3
     run_zmap_count=1
     # every inteval,start a timer to find a task to run

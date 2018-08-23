@@ -18,7 +18,19 @@ class daoNodeManager(object):
     def __init__(self):
         self.client = mc()
         self.db = self.client.nodeDB
-        
+    def update(self,col,find_dict,update_dict):
+        coll=self.db[col]
+        return coll.update_many(find_dict, {"$set":update_dict })
+
+    def findOne(self,col,find_dict):
+        coll=self.db[col]
+        return coll.find_one(find_dict)
+
+    def insert(self,tableName,document):
+        coll=self.db[tableName]
+        coll.insert_one(document)
+
+
 
     def update_task(self,find_dict,update_dict):
         coll=self.db[TASK]

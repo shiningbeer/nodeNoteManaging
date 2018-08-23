@@ -54,46 +54,47 @@ const user = {
   delete: () => {},
 }
 
-const task = {
-  add: (req, res) => {
-    var newNodeTask = req.body.newNodeTask
-    if (newNodeTask == null)
+const zmapTask={
+  add:(req, res) => {
+    var task = req.body.task
+    if (task == null)
       return res.sendStatus(415)
-
-    //todo: verify validity of newNodeTask
-    newNodeTask.nodeTaskId = newNodeTask._id
-    newNodeTask.zmapRunning = false 
-    delete newNodeTask.node
-    delete newNodeTask._id
-    delete newNodeTask.taskReceived
-    delete newNodeTask.needToNotifyOperChanged
-    delete newNodeTask.scanRangeReceived
-    delete newNodeTask.scanResult
-    delete newNodeTask.zmapResult
-    delete newNodeTask.syncedToNodeSucessful
-    delete newNodeTask.syncTime
-
-    var task = {
-      ...newNodeTask,
+    var newtask = {
+      ...task,
       needToSync:false,
+      running:false,
     }
-    dbo.result.createCol(newNodeTask.nodeTaskId+'zr',(err,rest)=>{})
-    dbo.result.createCol(newNodeTask.nodeTaskId+'sr',(err,rest)=>{})
-    dbo.task.add(task, (err, rest) => {})
+    dbo.insertCol('zmapTask',newtask, (err, rest) => {})
     res.sendStatus(200)
-
   },
-  delete: (req, res) => {
-    var nodeTaskId = req.body.nodeTaskId
-    if (nodeTaskId == null)
+  delete:(req, res) => {
+    var taskId = req.body.taskId
+    if (taskId == null)
       return res.sendStatus(415)
-    //here i dont judge if the db go wrong
-    dbo.task.del(nodeTaskId, (err, rest) => {})
-    dbo.result.delCollection(nodeTaskId+'zr', (err, rest) => {})
-    dbo.result.delCollection(nodeTaskId+'sr', (err, rest) => {})
-
+    dbo.deleteCol('zmapTask',{taskId}, (err, rest) => {})
+    dbo.dropCol(taskId+'--zr', (err, rest) => {})
     res.sendStatus(200)
   },
+  syncCommand:(req, res) => {
+    var {taskId,paused,} = req.body
+    if (taskId == null ||  paused == null)
+      return res.sendStatus(415)
+    var update = {
+      paused,
+      goWrong:false
+    }
+    dbo.updateCol('zmapTask',{taskId}, update, (err, rest) => {
+      err ? res.sendStatus(500) : res.sendStatus(200)
+    })
+  },
+  syncProgress:(req, res) => {
+    console.log(req.body)
+    res.sendStatus(200)
+  },
+}
+
+const task = {
+
   getResult: (req, res) => {
     let {
       nodeTaskId,
@@ -110,21 +111,7 @@ const task = {
       })
     })
   },
-  changeOper: (req, res) => {
-    var {
-      taskId,
-      paused,
-    } = req.body
-    if (taskId == null ||  paused == null)
-      return res.sendStatus(415)
-    var update = {
-      paused,
-      goWrong:false
-    }
-    dbo.task.update(taskId, update, (err, rest) => {
-      err ? res.sendStatus(500) : res.sendStatus(200)
-    })
-  },
+
   syncTask: (req, res) => {
     dbo.task.get_unSync_tasks(async (err, result) => {
       if (err)
@@ -228,9 +215,15 @@ const setting = {
 module.exports = {
   myMiddleWare,
   user,
-  task,
   plugin,
   setting,
   connectDB,
+
+  //new
+  zmapTask,
+
+  //old  
+  // task,
+
 
 }

@@ -18,6 +18,37 @@ var connect = (url, dbname, callback) => {
     })
 }
 
+var insertCol = (col, insobj, callback) => {
+    dbo.collection(col).insertOne(insobj, (err, rest) => {
+        callback(err, rest)
+    })
+}
+
+var createCol=(name,callback)=>{
+    dbo.createCollection(name,(err,result)=>{callback(err,result)})
+}
+
+var deleteCol = (col, wherestr, callback) => {
+    dbo.collection(col).deleteMany(wherestr, (err, rest) => {
+        callback(err, rest)
+    })
+}
+
+var dropCol= (col,callback)=>{
+    dbo.collection(col).drop(callback)
+}
+
+var updateCol= (col,wherestr, update, callback) => {
+    var updatestr = {
+        $set: update
+    }
+    dbo.collection(col).updateMany(wherestr, updatestr, (err, rest) => {
+        callback(err, rest)
+    })
+}
+
+
+
 /* basic crub operation */
 var insert = (col, insobj, callback) => {
     dbo.collection(col).insertOne(insobj, (err, rest) => {
@@ -208,6 +239,14 @@ var setting = {
 
 module.exports = {
     connect,
+
+    //new
+    insertCol,
+    createCol,
+    deleteCol,
+    dropCol,
+    updateCol,
+    //old
     result,
     task,
     setting,

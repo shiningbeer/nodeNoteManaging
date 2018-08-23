@@ -4,7 +4,7 @@ var multer = require('multer')
 const {
   myMiddleWare,
   user,
-  task,
+  zmapTask,
   setting,
   plugin,
   connectDB
@@ -39,12 +39,17 @@ app.post('/user/gettoken', user.getToken)
 app.post('/user/add', user.add)
 app.post('/user/delete', user.delete)
 
+app.post('/zmaptask/add', zmapTask.add)
+app.post('/zmaptask/delete', zmapTask.delete)
+app.post('/zmaptask/syncCommand', zmapTask.syncCommand)
+app.post('/zmaptask/syncProgress', zmapTask.syncProgress)
 
-app.post('/task/add', task.add)
-app.post('/task/delete', task.delete)
-app.post('/task/getResult', task.getResult)
-app.post('/task/changeOper', task.changeOper)
-app.post('/task/syncTask', task.syncTask)
+
+// app.post('/task/add', task.add)
+// app.post('/task/delete', task.delete)
+// app.post('/task/getResult', task.getResult)
+// app.post('/task/changeOper', task.changeOper)
+// app.post('/task/syncTask', task.syncTask)
 
 
 app.post('/plugin/add', upload.single('file'), plugin.add)
