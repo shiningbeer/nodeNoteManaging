@@ -6,7 +6,7 @@ var moment = require('moment')
 
 
 const connectDB = (callback) => {
-  dbo.connect("mongodb://localhost:27017", 'nodeDB', callback)
+  dbo.connect("mongodb://localhost:27017", 'nodeDBDev2', callback)
 }
 
 const myMiddleWare = {
