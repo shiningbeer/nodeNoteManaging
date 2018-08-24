@@ -53,7 +53,7 @@ var find = (col, wherestr = {}, callback) => {
 //result
 var result = {
     getLimit: (tName, skip, limit, callback) => {
-        dbo.collection(tName).find().skip(skip).limit(limit).toArray((err, result) => {
+        dbo.collection(tName).find().skip(skip).toArray((err, result) => {
             callback(err, err?[]:result)
         });
     },
