@@ -101,6 +101,7 @@ def doTask():
 
     
     # see if there are problems with plugin and zmap result.
+    id=task[f_ID]
     strid=task[f_ID].__str__()
     task_name=task[fTASKNAME]
     node_task_id=task[fNODETASKID]
@@ -113,17 +114,17 @@ def doTask():
         exec("from plugins import " + plugin + " as scanning_plugin")
     ##### timer end case 3 : can't find plugin
     except:
-        mylog.importantLog(id,task_name,'can\'t find plugin: '+plugin,True)
+        mylog.importantLog(strid,task_name,'can\'t find plugin: '+plugin,True)
         # end of this fucntion and thus the timer
         return
     ##### timer end case 4 plugin does not has the scan function
     if not scanning_plugin.scan:
-        mylog.importantLog(id,task_name,'plugin: '+plugin+' have no scan function!',True)
+        mylog.importantLog(strid,task_name,'plugin: '+plugin+' have no scan function!',True)
         # end of this fucntion and thus the timer
         return
     ##### timer end case 5 can't find zmap result file
     if not os.path.exists('./zr/'+strid):
-        mylog.importantLog(id,task_name,'cant find zmap result file!',True)
+        mylog.importantLog(strid,task_name,'cant find zmap result file!',True)
         # end of this fucntion and thus the timer
         return
     # compute the thread count
@@ -143,7 +144,7 @@ def doTask():
     dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fIMPLSTATUS:sRUNNING,fNEEDTOSYNC:True})
 
     # do the job, log first                
-    mylog.importantLog(id,task_name,'Task Run with '+str(thread_allot)+' threads',False)
+    mylog.importantLog(strid,task_name,'Task Run with '+str(thread_allot)+' threads',False)
     # use mutiple threads to run the plugin's scan to do this job
     dp=multiThread(thread_allot,scanning_plugin.scan,recordResult)
     index=0   
@@ -173,7 +174,7 @@ def doTask():
             task_modi=dbo.getOne_task({f_ID:id})
             ##### timer end case 6 : task paused by new instruction
             if task_modi[fOPERSTATUS]!=sRUN:
-                mylog.importantLog(id,task_name,'Task Paused.',False)
+                mylog.importantLog(strid,task_name,'Task Paused.',False)
                 # record progress
                 r=dp.snapThreadPayloads()
                 if r!=None:
@@ -202,7 +203,7 @@ def doTask():
                         thread_allot=thread_allot+additional
                 thread_demand=new_demand
                 dbo.update_task({f_ID:id},{fTHREADALLOT:thread_allot,fNEEDTOSYNC:True})
-                mylog.importantLog(id,task_name,'Task Threads changed to '+str(thread_allot)+'.',False)
+                mylog.importantLog(strid,task_name,'Task Threads changed to '+str(thread_allot)+'.',False)
                     
 
     # task complete! change the status
