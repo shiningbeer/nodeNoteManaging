@@ -73,7 +73,7 @@ def zmapwork():
         dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})
         sleep(5)
         print count+1
-        dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1,fNEEDTOSYNC:True})
+        dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1})
         task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})
         paused=task_modi[fPAUSED]
         if paused:
@@ -82,13 +82,13 @@ def zmapwork():
             # exit timer when paused
             return
     # zmap is complete
-    dbo.update('zmapTask',{fTASKID:taskId},{fCOMPLETE:True,fNEEDTOSYNC:True,fRUNNING:False})
+    dbo.update('zmapTask',{fTASKID:taskId},{fCOMPLETE:True,fRUNNING:False})
     incrementZmapLimit()
    
 if __name__ == '__main__':
     # todo:only one sample of this programme should be run
     # at the start, set all task no running zmap
-    dbo.update('zmapTask',{fRUNNING:True},{fRUNNING:False,fNEEDTOSYNC:True})
+    dbo.update('zmapTask',{fRUNNING:True},{fRUNNING:False})
     task_inteval=3
     run_zmap_count=1
     # every inteval,start a timer to find a task to run

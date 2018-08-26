@@ -18,6 +18,7 @@ var connect = (url, dbname, callback) => {
     })
 }
 
+//new
 var insertCol = (col, insobj, callback) => {
     dbo.collection(col).insertOne(insobj, (err, rest) => {
         callback(err, rest)
@@ -52,12 +53,21 @@ var findoneCol = (col, where = {}, callback) => {
         callback(err, result)
     });
 
-    /* basic crub operation */
-    var insert = (col, insobj, callback) => {
-        dbo.collection(col).insertOne(insobj, (err, rest) => {
-            callback(err, rest)
-        })
-    }
+
+}
+
+var findCol = (col, wherestr = {}, callback) => {
+    dbo.collection(col).find(wherestr).toArray((err, result) => {
+        callback(err, result)
+    });
+}
+//old
+
+/* basic crub operation */
+var insert = (col, insobj, callback) => {
+    dbo.collection(col).insertOne(insobj, (err, rest) => {
+        callback(err, rest)
+    })
 }
 
 var del = (col, wherestr, callback) => {
@@ -251,6 +261,7 @@ module.exports = {
     dropCol,
     updateCol,
     findoneCol,
+    findCol,
     //old
     result,
     task,

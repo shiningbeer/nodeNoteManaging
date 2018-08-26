@@ -61,7 +61,6 @@ const zmapTask = {
       return res.sendStatus(415)
     var newtask = {
       ...task,
-      needToSync: false,
       running: false,
     }
     dbo.insertCol('zmapTask', newtask, (err, rest) => { })
@@ -87,13 +86,40 @@ const zmapTask = {
       err ? res.sendStatus(500) : res.sendStatus(200)
     })
   },
-  syncProgress: (req, res) => {
+  syncProgress: async (req, res) => {
     console.log(req.body)
     var { taskId } = req.body
-    dbo.findoneCol('zmapTask', { taskId }, (err, rest) => {
-      console.log(rest)
-      res.json(rest)
+    var syncInfo = await new Promise((resolve, reject) => {
+      dbo.findoneCol('zmapTask', { taskId }, (err, rest) => {
+        resolve(rest)
+      })
     })
+    var taskResult = await new Promise((resolve, reject) => {
+      dbo.findCol(taskId + '--zr', { sent: false }, (err, rest) => {
+        resolve(rest)
+      })
+    })
+    var latestResult = []
+    for (var r of taskResult) {
+      latestResult.push(r.ip)
+    }
+    var syncResult = {
+      goWrong: syncInfo.goWrong,
+      progress: syncInfo.progress,
+      complete: syncInfo.complete,
+      running: syncInfo.running,
+      latestResult,
+    }
+    //mark the result is sent
+    for (var r of taskResult) {
+      await new Promise((resolve, reject) => {
+        console.log(r._id)
+        dbo.updateCol(taskId + '--zr', { _id: r._id }, { sent: true }, (err, rest) => {
+          resolve(rest)
+        })
+      })
+    }
+    res.json(syncResult)
 
   },
 }
