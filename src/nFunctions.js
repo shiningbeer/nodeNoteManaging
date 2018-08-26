@@ -119,6 +119,9 @@ const zmapTask = {
         })
       })
     }
+    if (syncInfo.complete) {
+      //delete the task and its result.
+    }
     res.json(syncResult)
 
   },
