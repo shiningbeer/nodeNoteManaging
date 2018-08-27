@@ -56,11 +56,18 @@ const user = {
 
 const zmapTask = {
   add: (req, res) => {
-    var task = req.body.task
-    if (task == null)
+    var {taskId,port,ipRange,paused} = req.body
+    if (taskId==null||port==null||ipRange==null||paused==null)
       return res.sendStatus(415)
+    
     var newtask = {
-      ...task,
+      taskId,
+      port,
+      ipRange,
+      paused,
+      goWrong:false,
+      progress:0,
+      complete:false,
       running: false,
     }
     dbo.insertCol('zmapTask', newtask, (err, rest) => { })
