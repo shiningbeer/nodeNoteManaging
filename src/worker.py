@@ -73,11 +73,11 @@ def recordResult(result,tableName,ip):
         convert2unicode(result)
         rest={'ip':ip,'scanTime':int(time.time()),'data':result}
         try:
-            dbo.saveResult(tableName,result)
+            dbo.saveResult(tableName,rest)
         except:
             id=getId()
             result['_id']=ObjectId(id) 
-            dbo.saveResult(tableName,result)
+            dbo.saveResult(tableName,rest)
 
 def doTask():
     '''

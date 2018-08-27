@@ -224,9 +224,10 @@ def scan(ip):
         #print output
         if output:
             #to_return["dnp3-info"] = copy.deepcopy(output)
-            to_return['data'] = copy.deepcopy(output)
+            #to_return['data'] = copy.deepcopy(output)
+            to_return = copy.deepcopy(output)
             output.clear()
-            to_return['IP'] = ip
+            #to_return['IP'] = ip
         #to_return["output"] = output
     except Exception,e:
         print 's7-enumerate get error', str(e)
@@ -236,6 +237,6 @@ def scan(ip):
     #while True:
         #pass
 if __name__ == '__main__':
-    ip = '37.247.92.40'
+    ip = '211.21.190.232'
     dict_s7 = scan(ip)
     print dict_s7
