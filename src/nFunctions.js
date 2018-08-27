@@ -135,7 +135,6 @@ const zmapTask = {
 }
 
 const task = {
-
   getResult: (req, res) => {
     let {
       nodeTaskId,

@@ -52,7 +52,7 @@ def zmapwork():
     ipRange=task[fIPRANGE]
     # start from progress
     progress=task[fPROGRESS]
-
+    mylog.LogInJustScreen('start task: '+taskId)
     count=-1
     for ip in ipRange:
         count=count+1        
@@ -71,8 +71,8 @@ def zmapwork():
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
 
         dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})
-        sleep(5)
-        print count+1
+        sleep(10)
+        mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
         dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1})
         task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})
         paused=task_modi[fPAUSED]
@@ -82,6 +82,7 @@ def zmapwork():
             # exit timer when paused
             return
     # zmap is complete
+    mylog.LogInJustScreen('complete task: '+taskId)
     dbo.update('zmapTask',{fTASKID:taskId},{fCOMPLETE:True,fRUNNING:False})
     incrementZmapLimit()
    
