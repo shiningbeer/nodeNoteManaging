@@ -101,11 +101,16 @@ const zmapTask = {
         resolve(rest)
       })
     })
+    if(syncInfo==null){
+      res.sendStatus(500)
+      return
+    }
     var taskResult = await new Promise((resolve, reject) => {
       dbo.findCol(taskId + '--zr', { sent: false }, (err, rest) => {
         resolve(rest)
       })
     })
+    console.log(taskResult)
     var latestResult = []
     for (var r of taskResult) {
       latestResult.push(r.ip)
@@ -125,9 +130,6 @@ const zmapTask = {
           resolve(rest)
         })
       })
-    }
-    if (syncInfo.complete) {
-      //delete the task and its result.
     }
     res.json(syncResult)
 

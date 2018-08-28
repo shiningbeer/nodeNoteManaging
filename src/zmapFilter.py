@@ -69,9 +69,8 @@ def zmapwork():
         # for line in  open('zr/'+strid, 'r'):
         #     line=line.strip()
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
-
-        dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})
         sleep(10)
+        dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})        
         mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
         dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1})
         task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})
