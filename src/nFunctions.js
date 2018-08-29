@@ -57,6 +57,7 @@ const user = {
 const zmapTask = {
   add: (req, res) => {
     var {taskId,port,ipRange,paused} = req.body
+    console.log({taskId})
     if (taskId==null||port==null||ipRange==null||paused==null)
       return res.sendStatus(415)
     
@@ -71,7 +72,7 @@ const zmapTask = {
       running: false,
     }
     dbo.insertCol('zmapTask', newtask, (err, rest) => { })
-    res.sendStatus(200)
+    res.json('sabi')
   },
   delete: (req, res) => {
     var taskId = req.body.taskId
@@ -110,7 +111,6 @@ const zmapTask = {
         resolve(rest)
       })
     })
-    console.log(taskResult)
     var latestResult = []
     for (var r of taskResult) {
       latestResult.push(r.ip)
@@ -125,7 +125,6 @@ const zmapTask = {
     //mark the result is sent
     for (var r of taskResult) {
       await new Promise((resolve, reject) => {
-        console.log(r._id)
         dbo.updateCol(taskId + '--zr', { _id: r._id }, { sent: true }, (err, rest) => {
           resolve(rest)
         })

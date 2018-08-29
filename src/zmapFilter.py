@@ -43,7 +43,7 @@ def zmapwork():
     task=dbo.findOne('zmapTask',{fRUNNING:False,fGOWRONG:False,fCOMPLETE:False,fPAUSED:False})
     # if no task, print the msg and end this
     if task == None:
-        mylog.LogInJustScreen('No Task Now!')
+        # mylog.LogInJustScreen('No Task Now!')
         return    
     # if there is a task 
     decrementZmapLimit()
@@ -69,8 +69,8 @@ def zmapwork():
         # for line in  open('zr/'+strid, 'r'):
         #     line=line.strip()
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
-        sleep(10)
-        dbo.insert(taskId+'--zr',{'ip':count+1,'sent':False})        
+        sleep(0.5)
+        dbo.insert(taskId+'--zr',{'ip':ip,'sent':False})        
         mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
         dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1})
         task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})
