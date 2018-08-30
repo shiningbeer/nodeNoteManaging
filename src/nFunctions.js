@@ -79,8 +79,8 @@ const zmapTask = {
     if (taskId == null)
       return res.sendStatus(415)
     dbo.deleteCol('zmapTask', { taskId }, (err, rest) => { })
-    dbo.dropCol(taskId + '--zr', (err, rest) => { })
-    res.sendStatus(200)
+    dbo.dropCol(taskId + '--zr', (err, rest) => {res.sendStatus(200) })
+    
   },
   syncCommand: (req, res) => {
     var { taskId, paused, } = req.body
