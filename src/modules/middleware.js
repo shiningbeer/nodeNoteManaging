@@ -13,7 +13,7 @@ const myMiddleWare = {
         try {
           tokenContainedInfo = jwt.decode(token, 'whatistoken')
         } catch (e) {
-          console.log('token wrong!')
+          logger.error('token wrong!')
           return res.sendStatus(401)
         }
         req.tokenContainedInfo = tokenContainedInfo

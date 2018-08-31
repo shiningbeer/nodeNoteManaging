@@ -41,7 +41,7 @@ const zmapTask = {
     })
   },
   syncProgress: async (req, res) => {
-    console.log(req.body)
+    logger.debug(req.body)
     var { taskId } = req.body
     var syncInfo = await new Promise((resolve, reject) => {
       dbo.findoneCol('zmapTask', { _id:taskId }, (err, rest) => {

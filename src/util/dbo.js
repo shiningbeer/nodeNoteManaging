@@ -5,7 +5,7 @@ var dbo
 
 //connect
 var connect = (url, dbname, callback) => {
-    mongo.connect(url,{useNewUrlParser: true}, (err, db) => {
+    mongo.connect(url, (err, db) => {
         dbo = db.db(dbname)
         callback(err)
     })

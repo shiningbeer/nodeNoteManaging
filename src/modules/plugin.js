@@ -9,7 +9,6 @@ const plugin = {
     try {
       fs.renameSync(uploadDir + file.filename, uploadDir + file.originalname)
     } catch (e) {
-      console.log(e)
       return res.sendStatus(500)
     }
     res.sendStatus(200)

@@ -6,6 +6,7 @@ const {zmapTask}=require("./modules/zmapTask")
 const {plugin}=require("./modules/plugin")
 const {connect}=require("./util/dbo")
 const {myMiddleWare}=require('./modules/middleware')
+var {logger}=require('./util/logger')
 
 
 var app = express()
@@ -50,7 +51,7 @@ var server = app.listen(1911, function () {
   // var port = server.address().port
 
   connect("mongodb://localhost:27017", 'nodeDBDev2', (err) => {
-    err ? console.log('db connection fail!') : console.log('node server starts!')
+    err ? logger.info('db connection fail!') : logger.info('node server starts!')
   })
 
 })
