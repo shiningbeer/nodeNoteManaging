@@ -61,7 +61,7 @@ def convert2unicode(mydict):
 
 # initialize the database operator
 dbo=dbo()
-mylog=myLog('./work.mylog',dbo)
+mylog=myLog('./log/work.mylog',dbo)
 # global variables
 useable_threads=100
 def recordResult(result,tableName,ip):

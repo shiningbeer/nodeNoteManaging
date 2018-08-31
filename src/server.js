@@ -1,15 +1,11 @@
 var express = require('express')
 var bodypaser = require('body-parser')
 var multer = require('multer')
-const {
-  myMiddleWare,
-  user,
-  zmapTask,
-  setting,
-  plugin,
-  connectDB
-} = require('./nFunctions')
-
+const {user}=require('./modules/user')
+const {zmapTask}=require("./modules/zmapTask")
+const {plugin}=require("./modules/plugin")
+const {connect}=require("./util/dbo")
+const {myMiddleWare}=require('./modules/middleware')
 
 
 var app = express()
@@ -18,14 +14,7 @@ app.use(bodypaser.urlencoded({
 }))
 app.use(bodypaser.json())
 
-app.all('*', function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", '*');
-  res.header("Access-Control-Allow-Headers", "token,content-type,productId,X-Requested-With");
-  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
-  res.header("X-Powered-By", ' 3.2.1')
-  res.header("Content-Type", "application/json;charset=utf-8");
-  next();
-});
+app.all('*',myMiddleWare.header);
 
 var upload = multer({
   dest: plugin.uploadDir
@@ -44,30 +33,23 @@ app.post('/zmaptask/delete', zmapTask.delete)
 app.post('/zmaptask/syncCommand', zmapTask.syncCommand)
 app.post('/zmaptask/syncProgress', zmapTask.syncProgress)
 
-
-// app.post('/task/add', task.add)
-// app.post('/task/delete', task.delete)
-// app.post('/task/getResult', task.getResult)
-// app.post('/task/changeOper', task.changeOper)
-// app.post('/task/syncTask', task.syncTask)
-
-
 app.post('/plugin/add', upload.single('file'), plugin.add)
 app.post('/plugin/delete', plugin.delete)
 app.post('/plugin/get', plugin.get)
 app.post('/plugin/ifHave', plugin.ifHave)
 
-app.post('/setting/add', setting.add)
-app.post('/setting/delete', setting.delete)
-app.post('/setting/update', setting.update)
-app.post('/setting/get', setting.get)
+// app.post('/setting/add', setting.add)
+// app.post('/setting/delete', setting.delete)
+// app.post('/setting/update', setting.update)
+// app.post('/setting/get', setting.get)
 
 
 //start server at localhost on the designated port
 var server = app.listen(1911, function () {
   // var host = server.address().address
   // var port = server.address().port
-  connectDB((err) => {
+
+  connect("mongodb://localhost:27017", 'nodeDBDev2', (err) => {
     err ? console.log('db connection fail!') : console.log('node server starts!')
   })
 

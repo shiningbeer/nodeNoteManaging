@@ -5,11 +5,11 @@ import json
 import datetime
 import sys
 import threading
-from dao import daoNodeManager as dbo
-from myLog import myLog
+from util.dao import daoNodeManager as dbo
+from util.myLog import myLog
 import logging
 from time import sleep
-from const import *
+from util.const import *
 
 default_encoding = 'utf-8'
 if sys.getdefaultencoding() != default_encoding:
@@ -18,7 +18,7 @@ if sys.getdefaultencoding() != default_encoding:
 
 # initialize db operator
 dbo=dbo()
-mylog=myLog('./zmap.mylog',dbo)
+mylog=myLog('./logs/zmap.mylog',dbo)
 task_inteval=3
 run_zmap_count=1
 lock=threading.Lock()
@@ -47,12 +47,13 @@ def zmapwork():
         return    
     # if there is a task 
     decrementZmapLimit()
-    taskId=task[fTASKID]
+    taskId=task[f_ID]
+    strId=taskId.__str__()
     port=task[fPORT]
     ipRange=task[fIPRANGE]
     # start from progress
     progress=task[fPROGRESS]
-    mylog.LogInJustScreen('start task: '+taskId)
+    mylog.LogInJustScreen('start task: '+strId)
     count=-1
     for ip in ipRange:
         count=count+1        
@@ -70,19 +71,19 @@ def zmapwork():
         #     line=line.strip()
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
         sleep(0.5)
-        dbo.insert(taskId+'--zr',{'ip':ip,'sent':False})        
+        dbo.insert('taskResult--'+strId,{'ip':ip,'sent':False})        
         mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
-        dbo.update('zmapTask',{fTASKID:taskId},{fPROGRESS:count+1})
-        task_modi=dbo.findOne('zmapTask',{fTASKID:taskId})
+        dbo.update('zmapTask',{f_ID:taskId},{fPROGRESS:count+1})
+        task_modi=dbo.findOne('zmapTask',{f_ID:taskId})
         paused=task_modi[fPAUSED]
         if paused:
-            dbo.update('zmapTask',{fTASKID:taskId},{fRUNNING:False})
+            dbo.update('zmapTask',{f_ID:taskId},{fRUNNING:False})
             incrementZmapLimit()
             # exit timer when paused
             return
     # zmap is complete
-    mylog.LogInJustScreen('complete task: '+taskId)
-    dbo.update('zmapTask',{fTASKID:taskId},{fCOMPLETE:True,fRUNNING:False})
+    mylog.LogInJustScreen('complete task: '+strId)
+    dbo.update('zmapTask',{f_ID:taskId},{fCOMPLETE:True,fRUNNING:False})
     incrementZmapLimit()
    
 if __name__ == '__main__':

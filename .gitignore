@@ -1,6 +1,3 @@
 /node_modules
 *.pyc
-/src/zr/
-/src/work.mylog
-/src/zmap.mylog
-/src/targets
+/src/logs
