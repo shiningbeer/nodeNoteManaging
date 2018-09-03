@@ -38,6 +38,7 @@ app.post('/plugin/add', upload.single('file'), plugin.add)
 app.post('/plugin/delete', plugin.delete)
 app.post('/plugin/get', plugin.get)
 app.post('/plugin/ifHave', plugin.ifHave)
+app.post('/pulse', (req,res)=>{res.sendStatus(200)})
 
 // app.post('/setting/add', setting.add)
 // app.post('/setting/delete', setting.delete)
