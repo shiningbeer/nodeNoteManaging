@@ -40,7 +40,7 @@ def zmapwork():
     if run_zmap_count<=0:
         # mylog.LogInJustScreen('Waiting other task to be done')
         return
-    task=dbo.findOne('zmapTask',{fRUNNING:False,fGOWRONG:False,fCOMPLETE:False,fPAUSED:False})
+    task=dbo.findOne('task',{fRUNNING:False,fGOWRONG:False,fCOMPLETE:False,fPAUSED:False})
     # if no task, print the msg and end this
     if task == None:
         # mylog.LogInJustScreen('No Task Now!')
@@ -71,25 +71,26 @@ def zmapwork():
         #     line=line.strip()
         #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
         sleep(0.5)
-        dbo.insert('taskResult--'+strId,{'ip':ip,'sent':False})        
+        for i in range(8):
+            dbo.insert('taskResult--'+strId,{'re':ip+'--'+str(i),'sent':False})        
         mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
-        dbo.update('zmapTask',{f_ID:taskId},{fPROGRESS:count+1})
-        task_modi=dbo.findOne('zmapTask',{f_ID:taskId})
+        dbo.update('task',{f_ID:taskId},{fPROGRESS:count+1})
+        task_modi=dbo.findOne('task',{f_ID:taskId})
         paused=task_modi[fPAUSED]
         if paused:
-            dbo.update('zmapTask',{f_ID:taskId},{fRUNNING:False})
+            dbo.update('task',{f_ID:taskId},{fRUNNING:False})
             incrementZmapLimit()
             # exit timer when paused
             return
     # zmap is complete
     mylog.LogInJustScreen('complete task: '+strId)
-    dbo.update('zmapTask',{f_ID:taskId},{fCOMPLETE:True,fRUNNING:False})
+    dbo.update('task',{f_ID:taskId},{fCOMPLETE:True,fRUNNING:False})
     incrementZmapLimit()
    
 if __name__ == '__main__':
     # todo:only one sample of this programme should be run
     # at the start, set all task no running zmap
-    dbo.update('zmapTask',{fRUNNING:True},{fRUNNING:False})
+    dbo.update('task',{fRUNNING:True},{fRUNNING:False})
     task_inteval=3
     run_zmap_count=1
     # every inteval,start a timer to find a task to run

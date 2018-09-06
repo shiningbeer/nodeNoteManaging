@@ -1,4 +1,5 @@
 var dbo = require('../util/dbo')
+var jwt = require('jwt-simple')
 const user = {
   getToken: (req, res) => {
     var user = req.body.username
@@ -21,6 +22,6 @@ const user = {
   add: () => { },
   delete: () => { },
 }
-module.exports={
-    user,
+module.exports = {
+  user,
 }
