@@ -34,6 +34,6 @@ const plugin = {
   uploadDir
 }
 
-module.exports={
-    plugin,
+module.exports = {
+  plugin,
 }

@@ -17,7 +17,7 @@ class daoNodeManager(object):
     # 构造时连接数据库
     def __init__(self):
         self.client = mc()
-        self.db = self.client.nodeDev2
+        self.db = self.client.node
     def update(self,col,find_dict,update_dict):
         coll=self.db[col]
         return coll.update_many(find_dict, {"$set":update_dict })

@@ -52,7 +52,7 @@ var server = app.listen(1911, function () {
   // var host = server.address().address
   // var port = server.address().port
 
-  connect("mongodb://localhost:27017", 'nodeDev2', (err) => {
+  connect("mongodb://localhost:27017", 'node', (err) => {
     err ? logger.info('db connection fail!') : logger.info('node server starts!')
   })
 
