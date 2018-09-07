@@ -1,4 +1,4 @@
-var dbo = require('../util/dbo')
+var {sdao} = require('../util/dao')
 var jwt = require('jwt-simple')
 const user = {
   getToken: (req, res) => {

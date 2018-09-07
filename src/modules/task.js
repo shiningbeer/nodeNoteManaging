@@ -1,7 +1,7 @@
 var { logger } = require('../util/logger')
-var dbo = require('../util/dbo')
+var {sdao} = require('../util/dao')
 const task = {
-  add: (req, res) => {
+  add: async (req, res) => {
     var { taskId, port, ipRange, paused } = req.body
     logger.debug({ taskId })
     if (taskId == null || port == null || ipRange == null || paused == null)
@@ -17,18 +17,19 @@ const task = {
       complete: false,
       running: false,
     }
-    dbo.insertCol('task', newtask, (err, rest) => { })
+    await sdao.insert('task', newtask)
     res.sendStatus(200)
   },
-  delete: (req, res) => {
+  delete: async (req, res) => {
     var taskId = req.body.taskId
     if (taskId == null)
       return res.sendStatus(415)
-    dbo.deleteCol('task', { _id: taskId }, (err, rest) => { })
-    dbo.dropCol('taskResult--' + taskId, (err, rest) => { res.sendStatus(200) })
+    await sdao.delete('task', { _id: taskId })
+    await sdao.dropCol('taskResult--' + taskId)
+    res.sendStatus(200)
 
   },
-  syncCommand: (req, res) => {
+  syncCommand: async (req, res) => {
     var { taskId, paused, } = req.body
     if (taskId == null || paused == null)
       return res.sendStatus(415)
@@ -36,32 +37,19 @@ const task = {
       paused,
       goWrong: false
     }
-    dbo.updateCol('task', { _id: taskId }, update, (err, rest) => {
-      err ? res.sendStatus(500) : res.sendStatus(200)
-    })
+    await sdao.update('task', { _id: taskId }, update)
+    res.sendStatus(200)
   },
   syncProgress: async (req, res) => {
     logger.debug(req.body)
     var { taskId } = req.body
-    var syncInfo = await new Promise((resolve, reject) => {
-      dbo.findoneCol('task', { _id: taskId }, (err, rest) => {
-        resolve(rest)
-      })
-    })
+    var syncInfo = await sdao.findone('task', { _id: taskId })
     if (syncInfo == null) {
       logger.debug('cant find task with id:%s', taskId)
       res.sendStatus(500)
       return
     }
-    var resultCount = await new Promise((resolve, reject) => {
-      dbo.getCount('taskResult--' + taskId, {}, (err, rest) => {
-        resolve(rest)
-      })
-    })
-    // var latestResult = []
-    // for (var r of taskResult) {
-    //   latestResult.push(r.ip)
-    // }
+    var resultCount = await sdao.getCount('taskResult--' + taskId, {})
     var syncResult = {
       goWrong: syncInfo.goWrong,
       progress: syncInfo.progress,
@@ -69,15 +57,6 @@ const task = {
       running: syncInfo.running,
       resultCount,
     }
-    //mark the result is sent
-    // for (var r of taskResult) {
-    //   await new Promise((resolve, reject) => {
-    //     dbo.updateCol('taskResult--'+taskId, { _id: r._id }, { sent: true }, (err, rest) => {
-    //       resolve(rest)
-    //     })
-    //   })
-    // }
-    // logger.debug(syncResult)
     res.json(syncResult)
 
   },

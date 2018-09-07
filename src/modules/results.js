@@ -1,4 +1,4 @@
-var dbo = require('../util/dbo')
+var {sdao} = require('../util/dao')
 var jwt = require('jwt-simple')
 var { logger } = require('../util/logger')
 const results = {
@@ -8,11 +8,7 @@ const results = {
         if (taskId == null || skip == null || limit == null) {
             return res.sendStatus(415)
         }
-        var results = await new Promise((resolve, reject) => {
-            dbo.findSkipLimitCol('taskResult--' + taskId, {}, skip, limit, (err, rest) => {
-                resolve(rest)
-            })
-        })
+        var results = await sdao.findSkipLimit('taskResult--' + taskId, {}, skip, limit)
         logger.debug(results)
         let tosend = []
         for (var re of results) {

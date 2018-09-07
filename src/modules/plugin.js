@@ -1,5 +1,5 @@
 
-var dbo = require('../util/dbo')
+var {sdao} = require('../util/dao')
 var fs = require('fs')
 
 const uploadDir = './uploadPlugins/'
