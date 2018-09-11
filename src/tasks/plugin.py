@@ -78,31 +78,33 @@ def recordResult(result, id, ip,total,progress):
     record the result into database.
     this is the lock_func of multiThread class
     '''
-    if total==progress:
-        dbo.update('task',{f_ID: id}, {fCOMPLETE:True,fNEEDTOSYNC: True, fPROGRESS: total})
+    print total,progress+1
+    if total==progress+1:
+        dbo.update('task',{f_ID: ObjectId(id)}, {fCOMPLETE:True,fNEEDTOSYNC: True, fPROGRESS: total})
+        mylog.LogInJustScreen('task complete')
     if result != None and result != {}:
         convert2unicode(result)
-        rest = {'ip': ip, 'scanTime': int(time.time()), 'data': result}
+        re = {'ip': ip, 'scanTime': int(time.time()), 'data': result}
+        rest={'re': re,'sent': False}
         try:
-            dbo.insert(id, rest)
+            dbo.insert('taskResult--'+id, rest)
         except:
-            rid = getId(
-            result['_id'] = ObjectId(rid)
-            dbo.insert(id, rest)
+            rid = getId()
+            rest['_id'] = ObjectId(rid)
+            dbo.insert('taskResult--'+id, rest)
+def decrementTaskLimit():
+    global run_task_count
+    lock.acquire()
+    run_task_count = run_task_count-1
+    lock.release()
 
-
+def incrementTaskLimit():
+    global run_task_count
+    lock.acquire()
+    run_task_count = run_task_count+1
+    lock.release()
 def doTask():
-    def decrementTaskLimit():
-        global run_task_count
-        lock.acquire()
-        run_task_count = run_task_count-1
-        lock.release()
 
-    def incrementTaskLimit():
-        global run_task_count
-        lock.acquire()
-        run_task_count = run_task_count+1
-        lock.release()
 
     # run limit
     global run_task_count
@@ -123,10 +125,11 @@ def doTask():
     taskId = task[f_ID]
     strId = taskId.__str__()
     ipRange = task[fIPRANGE]
+    total=len(ipRange)
     # start from progress
     progress = task[fPROGRESS]
     mylog.LogInJustScreen('start task: '+strId)
-    count = -1
+    index = -1
     # see if there are problems with plugin and zmap result.
     plugin = task[fPLUGIN][fNAME]
     # delete the .py extension
@@ -136,6 +139,7 @@ def doTask():
     # timer end case 2 : can't find plugin
     except:
         mylog.LogInJustScreen('can\'t find plugin: '+plugin)
+        dbo.update('task',{f_ID:taskId},{fGOWRONG:True})
         incrementTaskLimit()
         # end of this fucntion and thus the timer
         return
@@ -151,85 +155,32 @@ def doTask():
     dp = multiThread(100, scanning_plugin.scan, recordResult)
     stepCounter = 0
     for ip in ipRange:
-        count = count+1
+        index = index+1
         stepCounter = stepCounter+1
-        if count < progress:
+        if index < progress:
             continue
         sleep(0.5)
         if stepCounter == 20:
-            mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
-            dbo.update('task', {f_ID: taskId}, {fPROGRESS: count+1})
+            stepCounter=0
+            mylog.LogInJustScreen(str(index+1)+'/'+str(len(ipRange)))
+            dbo.update('task', {f_ID: taskId}, {fPROGRESS: index+1})
             task_modi = dbo.findOne('task', {f_ID: taskId})
             paused = task_modi[fPAUSED]
             if paused:
+                r = dp.snapThreadPayloads()
+                if r != None:
+                    least = r[0]
+                    for item in r:
+                        if item < least:
+                            least = item
+                    dbo.update('task',{f_ID: id}, {fPROGRESS: least})
                 dbo.update('task', {f_ID: taskId}, {fRUNNING: False})
                 incrementTaskLimit()
                 return
-        # line = line.strip()
-        # # start from progress
-        # index = index+1
-        # if index < progress:
-        #     continue
-        # # one thread is dispatched to one line of ip, the params here are passed to thread functions
-        dp.dispatch((line,), (node_task_id, line), index, 20)
-        # stepCounter = stepCounter+1
-        # # record the progress,every the count of useable_threads
-        # if stepCounter == thread_allot:
-        #     r = dp.snapThreadPayloads()  # take the payloads all the thread is taking presently
-        #     # find the least
-        #     if r != None:
-        #         least = r[0]
-        #         for item in r:
-        #             if item < least:
-        #                 least = item
-        #         dbo.update_task(
-        #             {f_ID: id}, {fPROGRESS: least, fNEEDTOSYNC: True})
-        #     stepCounter = 0
+        dp.dispatch((ip,), (strId, ip,total,index), index, 120)
 
-        #     # look for any modification of the task instruction or params
-        #     task_modi = dbo.getOne_task({f_ID: id})
-        #     # timer end case 6 : task paused by new instruction
-        #     if task_modi[fOPERSTATUS] != sRUN:
-        #         mylog.importantLog(id, task_name, 'Task Paused.', False)
-        #         # record progress
-        #         r = dp.snapThreadPayloads()
-        #         if r != None:
-        #             least = r[0]
-        #             for item in r:
-        #                 if item < least:
-        #                     least = item
-        #             dbo.update_task({f_ID: id}, {
-        #                             fPROGRESS: least, fNEEDTOSYNC: True, fIMPLSTATUS: sWAITING, fTHREADALLOT: 0})
-        #         useable_threads = 100
-        #         return
-        #     new_demand = task_modi[fTHREADDEMAND]
-        #     # thread demand modified
-        #     if new_demand != thread_demand:
-        #         if new_demand < thread_allot:
-        #             surplus = thread_allot-new_demand
-        #             useable_threads = useable_threads+surplus
-        #             dp.setMaxThreadCount(new_demand)
-        #             thread_allot = new_demand
-        #         if new_demand > thread_allot:
-        #             if new_demand-thread_allot >= useable_threads:
-        #                 thread_allot = thread_allot+useable_threads
-        #                 useable_threads = 0
-        #             else:
-        #                 additional = new_demand-thread_allot
-        #                 useable_threads = useable_threads-additional
-        #                 thread_allot = thread_allot+additional
-        #         thread_demand = new_demand
-        #         dbo.update_task(
-        #             {f_ID: id}, {fTHREADALLOT: thread_allot, fNEEDTOSYNC: True})
-        #         mylog.importantLog(
-        #             id, task_name, 'Task Threads changed to '+str(thread_allot)+'.', False)
-
-    # task complete! change the status
-    dbo.update_task({f_ID: id}, {fIMPLSTATUS: sCOMPLETE, fOPERSTATUS: sCOMPLETE,
-                                 fNEEDTOSYNC: True, fPROGRESS: iptotal, fTHREADALLOT: 0})
-    useable_threads = 100
-    # timer end case 7: task completed!!
-
+    # timer end case 4,all ip dispatched 
+    incrementTaskLimit()
 
 if __name__ == '__main__':
     # todo:only one sample of this programme should be run

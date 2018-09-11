@@ -47,11 +47,11 @@ def runFuncWithTimeLimit(func,arg,timeout):
     t.join(timeout)
     if isinstance(t._error,TimeoutException):
     	t._stop()
-    	print ('timeout')
+    	print ('run thread timeout')
     	return None
     if t.isAlive():
     	t._stop()
-    	print ('timeout')
+    	print ('run thread timeout')
     	return None 
     if t._error is None:
     	return t.result 
