@@ -2,14 +2,16 @@ var { logger } = require('../util/logger')
 var {sdao} = require('../util/dao')
 const task = {
   add: async (req, res) => {
-    var { taskId, port, ipRange, paused } = req.body
+    var { taskId, port, ipRange, paused,type, plugin} = req.body
     logger.debug({ taskId })
-    if (taskId == null || port == null || ipRange == null || paused == null)
+    if (taskId == null ||  ipRange == null || paused == null)
       return res.sendStatus(415)
 
     var newtask = {
       _id: taskId,
       port,
+      plugin,
+      type,
       ipRange,
       paused,
       goWrong: false,

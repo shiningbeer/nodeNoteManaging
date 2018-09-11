@@ -9,7 +9,6 @@ const results = {
             return res.sendStatus(415)
         }
         var results = await sdao.findSkipLimit('taskResult--' + taskId, {}, skip, limit)
-        logger.debug(results)
         let tosend = []
         for (var re of results) {
             tosend.push(re.re)
