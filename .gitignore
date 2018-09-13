@@ -1,3 +1,4 @@
 /node_modules
 *.pyc
 /src/logs
+/src/tasks/zr/*.*
