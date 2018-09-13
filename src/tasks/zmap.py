@@ -62,21 +62,18 @@ def zmapwork():
         count = count+1
         if count < progress:
             continue
-        # try:
-        #     os.system('zmap -p '+port+' -B 5M '+ip+' -o ./zr/'+strid)
-        # except:
-        #     mylog.LogInScreenAndFileAndDB(id,task_name,'Run Zmap Failed!',True)
-        #     incrementZmapLimit()
-        #     # exit timer when meets error
-        #     return
+        try:
+            os.system('zmap -p '+port+' -B 5M '+ip+' -o ./zr/'+strId)
+        except:
+            mylog.LogInJustScreen('Run Zmap Failed!')
+            incrementZmapLimit()
+            # exit timer when meets error
+            return
 
-        # for line in  open('zr/'+strid, 'r'):
-        #     line=line.strip()
-        #     dbo.saveResult(nodeTaskId+'zr',{'ip':line,'sent':False})
-        sleep(0.5)
-        for i in range(8):
-            dbo.insert('taskResult--'+strId,
-                       {'re': ip+'--'+str(i), 'sent': False})
+        for line in  open('zr/'+strId, 'r'):
+            line=line.strip()
+            dbo.insert('taskResult--'+strId,{'re':line,'sent':False})
+
         mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
         dbo.update('task', {f_ID: taskId}, {fPROGRESS: count+1})
         task_modi = dbo.findOne('task', {f_ID: taskId})
