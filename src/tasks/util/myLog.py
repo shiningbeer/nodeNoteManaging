@@ -17,6 +17,7 @@ class myLog(object):
         )
 
         self.__dbo=dbo
+        self.lastMsg=''
     def LogInScreenAndFileAndDB(self,tid,tname,tmsg,mark_err):        
         ''' log important event both in log file and the task's db keyLog field
         args:
@@ -41,8 +42,11 @@ class myLog(object):
         nowTime=datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
         print nowTime+msg#log in screen
     def LogInJustScreen(self,msg):
+        if self.lastMsg==msg:            
+            return
         nowTime=datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
         print nowTime+msg#log in screen
+        self.lastMsg=msg
 
 
 if __name__ == '__main__':

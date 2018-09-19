@@ -117,7 +117,7 @@ def doTask():
                                 fGOWRONG: False, fCOMPLETE: False, fPAUSED: False})
     # timer end case 1 : no task
     if task == None:
-        # mylog.LogInJustScreen('No Task Now!')
+        mylog.LogInJustScreen('No Task Now!')
         return
     # if there is a task
     decrementTaskLimit()

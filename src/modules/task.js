@@ -1,10 +1,10 @@
 var { logger } = require('../util/logger')
-var {sdao} = require('../util/dao')
+var { sdao } = require('../util/dao')
 const task = {
   add: async (req, res) => {
-    var { taskId, port, ipRange, paused,type, plugin} = req.body
-    logger.debug({ taskId })
-    if (taskId == null ||  ipRange == null || paused == null)
+    var { taskId, port, ipRange, paused, type, plugin } = req.body
+    logger.info('【任务】:【添加】【%s】',taskId)
+    if (taskId == null || ipRange == null || paused == null)
       return res.sendStatus(415)
 
     var newtask = {
@@ -26,6 +26,7 @@ const task = {
     var taskId = req.body.taskId
     if (taskId == null)
       return res.sendStatus(415)
+    logger.info('【任务】:【删除】【%s】',taskId)
     await sdao.delete('task', { _id: taskId })
     await sdao.dropCol('taskResult--' + taskId)
     res.sendStatus(200)
@@ -35,6 +36,8 @@ const task = {
     var { taskId, paused, } = req.body
     if (taskId == null || paused == null)
       return res.sendStatus(415)
+    
+    logger.info('【任务】:【暂停/开始】【%s】',taskId)
     var update = {
       paused,
       goWrong: false
@@ -45,6 +48,7 @@ const task = {
   syncProgress: async (req, res) => {
     logger.debug(req.body)
     var { taskId } = req.body
+    logger.info('【任务】:【获取进度】【%s】',taskId)
     var syncInfo = await sdao.findone('task', { _id: taskId })
     if (syncInfo == null) {
       logger.debug('cant find task with id:%s', taskId)
@@ -62,6 +66,20 @@ const task = {
     res.json(syncResult)
 
   },
+  getResults: async (req, res) => {
+    var { taskId, skip, limit } = req.body
+    logger.info('【任务】:【获取结果】【%s】',taskId)
+    if (taskId == null || skip == null || limit == null) {
+      return res.sendStatus(415)
+    }
+    var results = await sdao.findSkipLimit('taskResult--' + taskId, {}, skip, limit)
+    let tosend = []
+    for (var re of results) {
+      tosend.push(re.re)
+    }
+    res.json(tosend)
+
+  }
 }
 module.exports = {
   task,

@@ -7,7 +7,6 @@ const { plugin } = require("./modules/plugin")
 const { adao } = require("./util/dao")
 const { myMiddleWare } = require('./modules/middleware')
 var { logger } = require('./util/logger')
-var { results } = require('./modules/results')
 
 var app = express()
 app.use(bodypaser.urlencoded({
@@ -33,13 +32,13 @@ app.post('/task/add', task.add)
 app.post('/task/delete', task.delete)
 app.post('/task/syncCommand', task.syncCommand)
 app.post('/task/syncProgress', task.syncProgress)
+app.post('/task/getResults', task.getResults)
 
 app.post('/plugin/add', upload.single('file'), plugin.add)
 app.post('/plugin/delete', plugin.delete)
 app.post('/plugin/get', plugin.get)
 app.post('/plugin/ifHave', plugin.ifHave)
 app.post('/pulse', (req, res) => { res.sendStatus(200) })
-app.post('/results/get', results.get)
 
 // app.post('/setting/add', setting.add)
 // app.post('/setting/delete', setting.delete)

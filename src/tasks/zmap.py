@@ -46,7 +46,7 @@ def zmapwork():
                                 fGOWRONG: False, fCOMPLETE: False, fPAUSED: False})
     # if no task, print the msg and end this
     if task == None:
-        # mylog.LogInJustScreen('No Task Now!')
+        mylog.LogInJustScreen('No Task Now!')
         return
     # if there is a task
     decrementZmapLimit()
