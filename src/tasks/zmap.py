@@ -70,9 +70,11 @@ def zmapwork():
             # exit timer when meets error
             return
 
-        for line in  open('zr/'+strId, 'r'):
-            line=line.strip()
-            dbo.insert('taskResult--'+strId,{'re':line,'sent':False})
+
+
+        for line in open('zr/'+strId, 'r'):
+            line = line.strip()
+            dbo.insert('taskResult--'+strId, {'re': line, 'sent': False})
 
         mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
         dbo.update('task', {f_ID: taskId}, {fPROGRESS: count+1})
@@ -90,6 +92,9 @@ def zmapwork():
 
 
 if __name__ == '__main__':
+    
+    if not os.path.exists('./zr'):
+            os.mkdir('./zr')
     # todo:only one sample of this programme should be run
     # at the start, set all task no running zmap
     dbo.update('task', {fRUNNING: True}, {fRUNNING: False})

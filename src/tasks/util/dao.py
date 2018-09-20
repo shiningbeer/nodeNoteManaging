@@ -30,55 +30,11 @@ class daoNodeManager(object):
         coll=self.db[tableName]
         coll.insert_one(document)
 
-
-
-    def update_task(self,find_dict,update_dict):
-        coll=self.db[TASK]
-        return coll.update_many(find_dict, {"$set":update_dict })
-    
-    def pushArray_task(self,find_dict,push_dict):
-        coll=self.db[TASK]
-        return coll.update_many(find_dict, {"$push":push_dict })
-
-
-    def getOne_task(self,find_dict):
-        coll=self.db[TASK]
-        cur = coll.find(find_dict)
-        tks = []
-        for d in cur:
-            tks.append(d)
-        if len(tks)==0:
-            return None
-        return tks[0]
-    def getOne_task_limit_fields(self,find_dict,field_dict):
-        coll=self.db[TASK]
-        cur = coll.find(find_dict,field_dict)
-        tks = []
-        for d in cur:
-            tks.append(d)
-        if len(tks)==0:
-            return None
-        return tks[0]
-
     def saveResult(self,tableName,document):
         coll=self.db[tableName]
         coll.insert_one(document)
 
-    def resetZmap(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'zmapProgress': 0,'zmapComplete': False}})
-
-
-    def resetNeedToSync(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'needToSync':True}})
-    def resetProgress(self):
-        coll = self.db.task
-        return coll.update_many({}, {"$set": {'progress': 0}})
-
 
 if __name__ == '__main__':
     dbo=daoNodeManager()
-    dbo.resetZmap()
-    dbo.resetNeedToSync()
-    
+    dbo.insert('task',{'plugin':{'name':'s7.py'},'ipRange':['210.203.0.1','202,21.1.1'],'paused':False,'complete':False,'goWrong':False,'running':False,'progress':0,'type':'plugin'})
