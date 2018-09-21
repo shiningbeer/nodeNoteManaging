@@ -37,4 +37,4 @@ class daoNodeManager(object):
 
 if __name__ == '__main__':
     dbo=daoNodeManager()
-    dbo.insert('task',{'plugin':{'name':'s7.py'},'ipRange':['210.203.0.1','202,21.1.1'],'paused':False,'complete':False,'goWrong':False,'running':False,'progress':0,'type':'plugin'})
+    dbo.insert('task',{'plugin':{'name':'s7.py'},'ipRange':['210.203.0.1','210.203.0.1','202,21.1.1'],'paused':False,'complete':False,'goWrong':False,'running':False,'progress':0,'type':'plugin'})
