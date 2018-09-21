@@ -28,11 +28,12 @@ def taskSelector(task):
     if task['type']=='plugin':
         return pluginTask(task)
 
-# initialize db operator
+# initialize
 dbo = dbo()
 mylog = myLog('./logs/plugin.mylog', dbo)
 basicTask.dbo=dbo
 basicTask.mylog=mylog
+basicTask.taskCount=0
 
 
 def runTask(limit):
