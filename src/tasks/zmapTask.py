@@ -50,6 +50,11 @@ class zmapTask(basicTask):
             mylog.LogInJustScreen(str(count+1)+'/'+str(len(ipRange)))
             dbo.update('task', {f_ID: taskId}, {fPROGRESS: count+1})
             task_modi = dbo.findOne('task', {f_ID: taskId})
+            if task_modi==None:
+                mylog.LogInJustScreen('Task could\'t find in db: '+strId)
+                mylog.LogInJustScreen('Task stopped: '+strId)
+                basicTask.taskCount-=1
+                return
             paused = task_modi[fPAUSED]
             if paused:
                 dbo.update('task', {f_ID: taskId}, {fRUNNING: False})

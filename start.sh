@@ -3,22 +3,14 @@ screennode=$'node'
 screen -S $screennode -X quit
 screen -dmS $screennode
 sleep 2s
-cmd=$"node nServer.js"
+cmd=$"node nserver.js"
 screen -S $screennode -X stuff "$cmd"
 screen -S $screennode -X stuff $'\n' 
 
-screennode=$'zmap'
+screennode=$'task'
 screen -S $screennode -X quit
 screen -dmS $screennode
 sleep 2s
-cmd=$"python zmapFilter.py"
-screen -S $screennode -X stuff "$cmd"
-screen -S $screennode -X stuff $'\n' 
-
-screennode=$'worker'
-screen -S $screennode -X quit
-screen -dmS $screennode
-sleep 2s
-cmd=$"python worker.py"
+cmd=$"sudo python ./tasks/runTask.py"
 screen -S $screennode -X stuff "$cmd"
 screen -S $screennode -X stuff $'\n' 
