@@ -30,7 +30,7 @@ def parsing(txt):
     elif txt.find('<TITLE>') != -1:   #content has TITLE
         #tt=txt.split('<TITLE>')[1]
         #title=tt.split('</TITLE>')[0]
-        title = tt.split('TITLE')[1]
+        title = txt.split('TITLE')[1]
         title = title[1:-2]
     else:
         title=''
