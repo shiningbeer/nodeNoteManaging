@@ -34,6 +34,8 @@ mylog = myLog('./logs/plugin.mylog', dbo)
 basicTask.dbo=dbo
 basicTask.mylog=mylog
 basicTask.taskCount=0
+if not os.path.exists('./zr'):
+    os.makedirs('./zr')
 
 
 def runTask(limit):
