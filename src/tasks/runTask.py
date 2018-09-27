@@ -30,7 +30,9 @@ def taskSelector(task):
 
 # initialize
 dbo = dbo()
-mylog = myLog('./logs/plugin.mylog', dbo)
+if not os.path.exists('./logs'):
+    os.makedirs('./logs')
+mylog = myLog('./logs/task.mylog', dbo)
 basicTask.dbo=dbo
 basicTask.mylog=mylog
 basicTask.taskCount=0
