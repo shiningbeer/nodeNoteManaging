@@ -74,7 +74,7 @@ class pluginTask(basicTask):
         # it is comfired the task can be run,  set the task is running
         dbo.update('task',{f_ID: taskId}, {fRUNNING: True })
 
-        dp = multiThread(100, scan, recordResult)
+        dp = multiThread(200, scan, recordResult)
         stepCounter = 0
         for ip in ipRange:
             index = index+1
