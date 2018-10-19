@@ -46,7 +46,6 @@ const task = {
     res.sendStatus(200)
   },
   syncProgress: async (req, res) => {
-    logger.debug(req.body)
     var { taskId } = req.body
     logger.info('[Task]:[sync][%s]',taskId)
     var syncInfo = await sdao.findone('task', { _id: taskId })
