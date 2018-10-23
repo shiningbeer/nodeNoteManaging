@@ -28,7 +28,10 @@ class daoNodeManager(object):
 
     def insert(self,tableName,document):
         coll=self.db[tableName]
-        coll.insert_one(document)
+        try:
+            coll.insert_one(document)
+        except:
+            print 'insert wrong'
 
     def saveResult(self,tableName,document):
         coll=self.db[tableName]
