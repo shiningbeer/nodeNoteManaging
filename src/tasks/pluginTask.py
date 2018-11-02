@@ -25,6 +25,7 @@ def getScan(plugin):
     try:
         exec("from plugins import " + plugin + " as scanning_plugin")
     except:
+        print 'kdkdkd'
         return None
     return scanning_plugin.scan
 
@@ -69,6 +70,7 @@ class pluginTask(basicTask):
         scan=getScan(plugin)
         if scan==None:
             dbo.update('task',{f_ID:taskId},{fGOWRONG:True})
+            mylog.LogInJustScreen('cannot find plugin')
             basicTask.taskCount-=1
             return
         # it is comfired the task can be run,  set the task is running
