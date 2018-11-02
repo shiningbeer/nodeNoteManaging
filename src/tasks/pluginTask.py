@@ -25,7 +25,7 @@ def getScan(plugin):
     try:
         exec("from plugins import " + plugin + " as scanning_plugin")
     except:
-        print 'kdkdkd'
+        print plugin
         return None
     return scanning_plugin.scan
 
