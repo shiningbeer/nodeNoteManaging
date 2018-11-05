@@ -24,8 +24,8 @@ def getScan(plugin):
 
     try:
         exec("from plugins import " + plugin + " as scanning_plugin")
-    except:
-        print plugin
+    except Exception, e:
+        print str(e)
         return None
     return scanning_plugin.scan
 
@@ -97,7 +97,7 @@ class pluginTask(basicTask):
                         for item in r:
                             if item < least:
                                 least = item
-                        dbo.update('task',{f_ID: id}, {fPROGRESS: least})
+                        dbo.update('task',{f_ID: taskId}, {fPROGRESS: least})
                     dbo.update('task', {f_ID: taskId}, {fRUNNING: False})
                     basicTask.taskCount-=1
                     return
@@ -106,4 +106,19 @@ class pluginTask(basicTask):
         # timer end case 4,all ip dispatched 
         basicTask.taskCount-=1
 
-
+if __name__ == '__main__':
+    from util.dao import daoNodeManager as dbo
+    from util.myLog import myLog
+    dbo = dbo()
+    if not os.path.exists('./logs'):
+        os.makedirs('./logs')
+    mylog = myLog('./logs/task.mylog', dbo)
+    basicTask.dbo=dbo
+    basicTask.mylog=mylog
+    basicTask.taskCount=0
+    
+    task={'_id':556,'port':None,'plugin':{'name':'https.py','port':'443','protocal': "TCP" }, "type" : "plugin",
+        "ipRange" : [ "1.34.34.125", "1.34.154.202", "1.34.179.229", "1.34.145.216", "1.34.116.176", "1.34.150.172", "1.34.63.21"],
+        'paused':True,'goWrong':False,'progress':0,'complete':False,'running':True}
+    tk=pluginTask(task)
+    tk.run()
