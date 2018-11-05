@@ -6,7 +6,7 @@ const myMiddleWare = {
     //中间件总是执行两次，其中有一次没带上我的数据，所以忽略掉其中一次
     if (req.get('access-control-request-method') == null) {
       if (req.originalUrl != '/task/syncProgress')
-        logger.debug('[Acess]:[path%s][IP%s]',req.originalUrl,req.ip)
+        logger.debug('[Access]:[path%s][IP%s]',req.originalUrl,req.ip)
       if (req.originalUrl != '/user/gettoken') {
         var token = req.get('token')
         let tokenContainedInfo

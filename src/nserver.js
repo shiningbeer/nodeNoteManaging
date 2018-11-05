@@ -9,11 +9,8 @@ const { myMiddleWare } = require('./modules/middleware')
 var { logger } = require('./util/logger')
 
 var app = express()
-app.use(bodypaser.urlencoded({
-  extended: false
-}))
-app.use(bodypaser.json())
-
+app.use(bodypaser.json({ limit: '50mb' }));
+app.use(bodypaser.urlencoded({ limit: '50mb', extended: true }));
 app.all('*', myMiddleWare.header);
 
 var upload = multer({
