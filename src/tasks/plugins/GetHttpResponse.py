@@ -38,7 +38,7 @@ def parsing(txt):
 
 def scan(ip):
     protocol = 'http'
-    port = 80
+    port = 81
     
     dict_header = {}
     http_version = 'HTTP/1.0'   #http version default is 'HTTP/1.0'
