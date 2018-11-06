@@ -52,7 +52,10 @@ class pluginTask(basicTask):
                 except:
                     rid = getId()
                     rest['_id'] = ObjectId(rid)
-                    dbo.insert('taskResult--'+id, rest)
+                    try:
+                        dbo.insert('taskResult--'+id, rest)
+                    except:
+                        mylog.LogInJustScreen('result insert err!')
 
 
         taskId = task[f_ID]
