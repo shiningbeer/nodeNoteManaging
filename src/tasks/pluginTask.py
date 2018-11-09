@@ -86,6 +86,7 @@ class pluginTask(basicTask):
             index = index+1
             stepCounter = stepCounter+1
             if index < progress:
+                stepCounter=0
                 continue
             sleep(0.5)
             if stepCounter == 20:
