@@ -52,7 +52,7 @@ def funct_lookup(str_id):
 	result = "%s (%d)" %(funct_id, num)
 	return result
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port = 1911):
 	orig_query = a2b_hex("666f7820612031202d3120666f782068656c6c6f0a7b0a" +
 	"666f782e76657273696f6e3d733a312e300a69643d693a310a686f73744e" +
 	"616d653d733a7870766d2d306f6d64633031786d790a686f737441646472" +
@@ -72,7 +72,7 @@ def scan(ip):
 	"392d613265612d3066616264333934643330350a6272616e6449643d733a" +
 	"76796b6f6e0a7d3b3b0a")
 	
-	port = 1911
+	
 	
 	to_return={}
 	#address = ("", 0)

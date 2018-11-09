@@ -29,12 +29,12 @@ def getZeroTerminatedString(response,pos):
 	return end_pos, data
 
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port = 30718):
 	L77FEH_RCR = a2b_hex("000000F4")
 	L77FEH_INF = a2b_hex("000000F6")
 	L77FEH_SETUP = a2b_hex("000000F8")
 	
-	port = 30718
+	
 	
 	to_return={}
 	#to_return["IP"] = ip

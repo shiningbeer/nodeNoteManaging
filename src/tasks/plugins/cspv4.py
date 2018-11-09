@@ -53,13 +53,12 @@ def funct_lookup(str_id):
    result = "%s (%d)" %(funct_id, num)
    return result
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port=2222):
 
    init_coms = a2b_hex("01010000000000000000000000040005000000000000000000000000")
    
    to_return={}
    
-   port = 2222
    #address = ("", 0)
    try:
       TargetAddr = (ip, port)

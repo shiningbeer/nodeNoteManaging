@@ -20,7 +20,7 @@ BUFSIZE = 10240
 
 
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port=789):
 	probe_manufacturer = a2b_hex("0004012b1b00")
 	
 	port = 789

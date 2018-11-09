@@ -146,7 +146,7 @@ def second_parse_response(response):
         print output['Copyright']
     return output
         
-def scan(ip):        
+def scan(ip,port = 102  ):        
 
     #portrule = shortport.port_or_service(47808, "bacnet", "udp")
     #if len(sys.argv) != 3:
@@ -163,7 +163,7 @@ def scan(ip):
     first_SZL_Request = a2b_hex("0300002102f080320700000000000800080001120411440100ff09000400110001")
     second_SZL_Request = a2b_hex("0300002102f080320700000000000800080001120411440100ff090004001c0001")
     
-    port = 102  
+    
     to_return={}
     #to_return["IP"] = ip
     #to_return["Port"] = port

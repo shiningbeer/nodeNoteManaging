@@ -19,12 +19,12 @@ BUFSIZE = 10240	#缓冲区大小10k
 
 
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port = 2404):
 	to_return={}
 	#ip = "37.61.202.200"
 	#ip = "46.23.185.39"
 
-	port = 2404
+	
 	try:
 		TargetAddr = (ip, port)
 	

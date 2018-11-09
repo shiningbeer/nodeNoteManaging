@@ -33,11 +33,11 @@ def getZeroTerminatedString(response,pos):
 	return end_pos, data
 
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port = 20547):
 
 	req_info = a2b_hex("cc01000b4002000047ee")
 
-	port = 20547
+	
 	
 	to_return={}
 	#to_return["IP"] = ip

@@ -131,7 +131,7 @@ class multiThread(object):
 
 if __name__ == '__main__':
     #example
-    def scan(x, y):
+    def scan(x,y):
     	#print 'I\'m ' + str(x) + ',' + str(y)
         if y==3:
             sleep(70)

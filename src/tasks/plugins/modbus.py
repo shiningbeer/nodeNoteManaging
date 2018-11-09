@@ -235,10 +235,10 @@ class Modbus:
     
         
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port = 502):
     
     to_return = {}
-    port = 502
+    
 
     #ip = "188.226.166.15"
     

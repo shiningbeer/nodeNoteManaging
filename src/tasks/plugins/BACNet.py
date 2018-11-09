@@ -39,14 +39,13 @@ def dataSwitch(data):
         data = data[2:]
     return str2
 
-def scan(IP):
+def scan(IP,port=47808):
 
     all_dict = {}
     dictOfBACNetInfo = {}
 
     str_send = '810a001101040005010c0c023FFFFF194b'
 
-    port = 47808
     address = ("", 0)   #选择随机可用的端口
     #TargetAddr = ("223.72.246.194", port)
     TargetAddr = (IP, port)    

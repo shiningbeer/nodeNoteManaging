@@ -68,6 +68,7 @@ class pluginTask(basicTask):
         index = -1
         # see if there are problems with plugin and zmap result.
         plugin = task[fPLUGIN]['name']
+        port=task[fPLUGIN]['port']
         # delete the .py extension
         plugin = plugin[0:len(plugin) - 3]
         scan=getScan(plugin)
@@ -104,7 +105,7 @@ class pluginTask(basicTask):
                     dbo.update('task', {f_ID: taskId}, {fRUNNING: False})
                     basicTask.taskCount-=1
                     return
-            dp.dispatch((ip,), (strId, ip,total,index), index, 120)
+            dp.dispatch((ip,port), (strId, ip,total,index), index, 120)
 
         # timer end case 4,all ip dispatched 
         basicTask.taskCount-=1

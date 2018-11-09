@@ -1306,10 +1306,10 @@ def get_string(data):	#解析数据，删除\x00之后的数据
 	return string
 
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port = 44818):
 
 	enip_req_ident = a2b_hex("63000000000000000000000000000000c1debed100000000")
-	port = 44818
+	
 	to_return={}
 
 	TargetAddr = (ip, port)

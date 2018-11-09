@@ -112,10 +112,9 @@ def funct_lookup(str_id):
    result = "%s (%d)" %(funct_id, num)
    return result
 #if __name__ == '__main__':
-def scan(ip):
+def scan(ip,port=20000):
    to_return={}
    
-   port = 20000
    #ip = '47.100.81.233'
    #address = ("", 0)
    
