@@ -91,7 +91,7 @@ class pluginTask(basicTask):
             sleep(0.5)
             if stepCounter == 20:
                 stepCounter=0
-                 r = dp.snapThreadPayloads()
+                r = dp.snapThreadPayloads()
                     if r != None:
                         least = r[0]
                         for item in r:
