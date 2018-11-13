@@ -26,7 +26,7 @@ class zmapTask(basicTask):
         basicTask.taskCount+=1
         taskId = task[f_ID]
         strId = taskId.__str__()
-        port = task[fPORT]
+        port = str(task[fPORT])
         ipRange = task[fIPRANGE]
         # start from progress
         progress = task[fPROGRESS]
