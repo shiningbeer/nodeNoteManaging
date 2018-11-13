@@ -88,10 +88,10 @@ class pluginTask(basicTask):
             if index < progress:
                 stepCounter=0
                 continue
-            sleep(0.5)
             if stepCounter == 20:
                 stepCounter=0
                 r = dp.snapThreadPayloads()
+                print r
                 if r != None:
                     least = r[0]
                     for item in r:
@@ -102,14 +102,7 @@ class pluginTask(basicTask):
                 dbo.update('task', {f_ID: taskId}, {fPROGRESS: index+1})
                 task_modi = dbo.findOne('task', {f_ID: taskId})
                 paused = task_modi[fPAUSED]
-                if paused:
-                    r = dp.snapThreadPayloads()
-                    if r != None:
-                        least = r[0]
-                        for item in r:
-                            if item < least:
-                                least = item
-                        dbo.update('task',{f_ID: taskId}, {fPROGRESS: least})
+                if paused:                   
                     dbo.update('task', {f_ID: taskId}, {fRUNNING: False})
                     basicTask.taskCount-=1
                     return
